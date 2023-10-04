@@ -51,9 +51,23 @@ router.post("/:productId/rate", async (req, res) => {
   }
 });
 
+router.get("/search", async (req, res) => {
+  try {
+      const query = req.query.q;  // This captures the query parameter ?q= from the URL
+
+      const products = await Product.find({
+          name: { $regex: query, $options: 'i' }  // This regex search will match products that contain the query string
+      }).limit(10);  // Limits the results to 10 products
+
+      res.json(products);
+  } catch (error) {
+      console.error("Error fetching search results:", error);
+      res.status(500).send("Error fetching search results.");
+  }
+});
+
+
 
 module.exports = router;
 
 
-
-module.exports = router;

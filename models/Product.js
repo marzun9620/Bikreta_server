@@ -10,8 +10,31 @@ const imageSchema = mongoose.Schema({
         contentType: String
     }
 });
+
+const ratingSchema = new mongoose.Schema({
+    user: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User',
+        required: true
+    },
+    ratingValue: {  
+        type: Number,
+        required: true,
+        min: 1,
+        max: 5
+    },
+    review: {  
+        type: String
+    },
+    date: {
+        type: Date,
+        default: Date.now
+    }
+});
+
 const productSchema = new mongoose.Schema({
-    name: {
+
+name: {
         type: String,
         required: true
     },
@@ -31,10 +54,19 @@ const productSchema = new mongoose.Schema({
         type: String,
         required: true
     },
-    productImage: imageSchema
+    productImage: imageSchema,
+	
+    ratings: [ratingSchema],
+    averageRating: {
+        type: Number,
+        default: 0
+    },
+    numberOfRatings: {
+        type: Number,
+        default: 0
+    }
 });
 
 
 const Product = mongoose.model('Product', productSchema);
-
 module.exports = Product;

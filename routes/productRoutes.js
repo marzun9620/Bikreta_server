@@ -22,6 +22,36 @@ router.get('/category/:category', async (req, res) => {
   }
 });
 
+
+router.post("/:productId/rate", async (req, res) => {
+  try {
+      const { userId, ratingValue } = req.body;
+      const product = await Product.findById(req.params.productId);
+      
+      if (!product) return res.status(404).send("Product not found");
+      
+      const newRating = {
+          user: userId,
+          ratingValue: parseInt(ratingValue)
+      };
+      
+      product.ratings.push(newRating);
+
+      const totalRatings = product.ratings.length;
+      const totalRatingValue = product.ratings.reduce((acc, curr) => acc + curr.ratingValue, 0);
+      
+      product.averageRating = totalRatingValue / totalRatings;
+      product.numberOfRatings = totalRatings;
+
+      await product.save();
+      
+      res.send({ message: "Rating added successfully!" });
+  } catch (error) {
+      res.status(500).send("Server error");
+  }
+});
+
+
 module.exports = router;
 
 

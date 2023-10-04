@@ -15,7 +15,9 @@ router.get('/category/:category', async (req, res) => {
   try {
     const products = await Product.find({ category: req.params.category });
     res.json(products);
+    console.log(products);
   } catch (err) {
+   
     res.status(500).json({ message: err.message });
   }
 });

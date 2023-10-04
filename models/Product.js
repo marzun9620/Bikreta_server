@@ -10,7 +10,6 @@ const imageSchema = mongoose.Schema({
         contentType: String
     }
 });
-
 const productSchema = new mongoose.Schema({
     name: {
         type: String,
@@ -24,8 +23,13 @@ const productSchema = new mongoose.Schema({
         type: String,
         required: true
     },
+    category: {
+        type: String,
+        required: true
+    },
     productImage: imageSchema
 });
+
 
 const Product = mongoose.model('Product', productSchema);
 

@@ -8,6 +8,7 @@ const addToCartRoute = require('./routes/addToCartRoute');
 const purchase = require('./routes/purchase');
 const productRoutes = require('./routes/productRoutes');
 const path = require('path');
+const graph = require('./controllers/graph');
 
 
 
@@ -30,6 +31,8 @@ app.use((err, req, res, next) => {
   app.use("/hob1/checkout", purchase);
 app.use("/api", taskRoute);
 app.use("/product/cart", addToCartRoute);
+
+app.use("/bar", graph);
 
 app.use('/api/products', productRoutes);
 app.use("/marzun/cart/", addToCartRoute);

@@ -17,16 +17,12 @@ router.get('/sales-data', (req, res) => {
         },
         {
             $group: {
-                _id: {
-                    productId: '$productId',
-                    location: '$user.location'
-                },
+                _id: '$user.location',
                 totalSales: { $sum: '$quantity' }
             }
         },
         {
             $sort: {
-                '_id.productId': 1,
                 totalSales: -1
             }
         }
@@ -39,5 +35,6 @@ router.get('/sales-data', (req, res) => {
         console.error(error);
         res.status(500).send('Error fetching sales data.');
     });
+    
 });
 module.exports = router;

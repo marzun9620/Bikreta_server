@@ -76,6 +76,8 @@ const userPic = async (req, res) => {
         }
 
         // Set the content type for the response
+
+		
         res.contentType(user.profilePhoto.image.contentType);
         res.send(user.profilePhoto.image.data);
     } catch (error) {

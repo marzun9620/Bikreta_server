@@ -88,7 +88,7 @@ try {
         const found = salesData.find(s => formatDate(s.date) === day.formattedDate);
         return found || day;
     });
- console.log(daysArray);
+ //console.log(daysArray);
     res.json(daysArray);
 
 } catch (err) {

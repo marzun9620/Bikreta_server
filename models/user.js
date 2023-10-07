@@ -4,16 +4,7 @@ const Joi = require("joi");
 const passwordComplexity = require("joi-password-complexity");
 require('dotenv').config();
 
-const imageSchema = new mongoose.Schema({
-    name: {
-        type: String,
-        required: true
-    },
-    image: {
-        data: Buffer,
-        contentType: String
-    }
-});
+
 
 const userSchema = new mongoose.Schema({
 	firstName: { type: String, required: true },
@@ -23,7 +14,11 @@ const userSchema = new mongoose.Schema({
 	email: { type: String, required: true, unique: true },
 	password: { type: String, required: true },
 	verified: { type: Boolean, default: false },
-	profilePhoto: imageSchema,
+	profilePhoto: {
+        url: String,          // Cloudinary URL for the image
+        publicId: String,     // Cloudinary Public ID
+        version: String       // Cloudinary Version for tracking purposes
+    },
 });
 
 userSchema.methods.generateAuthToken = function () {

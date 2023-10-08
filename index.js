@@ -9,6 +9,7 @@ const purchase = require('./routes/purchase');
 const productRoutes = require('./routes/productRoutes');
 const path = require('path');
 const graph = require('./controllers/graph');
+const erp = require('./routes/erpRoutes');
 
 
 
@@ -38,7 +39,7 @@ app.use('/api/products', productRoutes);
 app.use("/marzun/cart/", addToCartRoute);
 //console.log(__dirname);
 
-app.use('/erp', productRoutes);
+app.use('/erp', erp);
 
 app.use('/pdfs/', express.static(path.join(__dirname, 'public', 'pdfs')));
 

@@ -1,67 +1,55 @@
 const mongoose = require('mongoose');
 
-
-
-const ratingSchema = new mongoose.Schema({
-    user: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'User',
-        required: true
-    },
-    ratingValue: {  
-        type: Number,
-        required: true,
-        min: 1,
-        max: 5
-    },
-    review: {  
-        type: String
-    },
-    date: {
-        type: Date,
-        default: Date.now
-    }
-});
-
 const productSchema = new mongoose.Schema({
-
-name: {
+   productName: {
         type: String,
-        required: true
-    },
-    price: {
-        type: Number,
-        required: true
-    },
-    countInStock: {
-        type: Number,
-        required: true
+        required: true,
+        trim: true
     },
     description: {
         type: String,
+        trim: true
+    },
+    unitPrice: {
+        type: Number,
+        required: true,
+        min: 0
+    },
+    cartonSize: {
+        type: Number,
         required: true
+    },
+    cartonStock: {
+        type: Number,
+        required: true,
+        min: 0
+    },
+    minStockThreshold: {
+        type: Number,
+        required: true,
+        min: 0
     },
     category: {
         type: String,
-        required: true
+        ref: 'Category'
     },
-    productImage: {
-        url: String,         
-        publicId: String,     
-        version: String       
-    },
-	
-    ratings: [ratingSchema],
-    averageRating: {
+    ratingCount: {
         type: Number,
         default: 0
     },
-    numberOfRatings: {
+    avgRating: {
         type: Number,
         default: 0
     }
 });
 
+// Middleware to update the avgRating based on ratingCount
+// You might want to handle this logic when users rate the product in your service logic instead
+productSchema.pre('save', function(next) {
+    if (this.isModified('ratingCount') || this.isModified('avgRating')) {
+        this.avgRating = this.ratingCount / (this.avgRating || 1);
+    }
+    next();
+});
 
-const Product = mongoose.model('Product', productSchema);
-module.exports = Product;
+module.exports = mongoose.model('Product', productSchema);

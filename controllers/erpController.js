@@ -19,4 +19,15 @@ const addCategory = async (req, res) => {
         res.status(500).json({ message: "Server error" });
     }
 };
-module.exports=addCategory;
+const allCatagories = async (req, res) => {
+    try {
+        const categories = await Category.find();
+        res.json(categories);
+      } catch (error) {
+        res.status(500).send('Server Error');
+      }
+};
+module.exports={
+    addCategory,
+    allCatagories
+};

@@ -15,9 +15,9 @@ const userSchema = new mongoose.Schema({
 	password: { type: String, required: true },
 	verified: { type: Boolean, default: false },
 	profilePhoto: {
-        url: String,          // Cloudinary URL for the image
-        publicId: String,     // Cloudinary Public ID
-        version: String       // Cloudinary Version for tracking purposes
+        url: String,         
+        publicId: String,     
+        version: String       
     },
 });
 

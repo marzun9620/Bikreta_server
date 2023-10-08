@@ -3,6 +3,16 @@ const Product = require('../models/Product');
 
 
 
+const cloudinary = require('cloudinary').v2;
+          
+cloudinary.config({ 
+  cloud_name: 'dvt7ktdue', 
+  api_key: '343128951383287', 
+  api_secret: '86-oV6lIZFuMi6PtLM_oi2bKn50' 
+});
+
+const upload = multer({ storage: multer.memoryStorage() }).single('productImage');
+
 
 exports.getAllProducts1=async (req, res) => {
     try {
@@ -21,8 +31,7 @@ exports.getAllProducts = async (req, res) => {
         if (!product || !product.productImage) {
             throw new Error('No product image found');
         }
-        res.set('Content-Type', product.productImage.image.contentType);
-        res.send(product.productImage.image.data);
+        res.redirect(product.productImage.url);
     } catch (error) {
         console.error('Error:', error);
         res.status(404).send('Not Found');
@@ -46,31 +55,25 @@ exports.productDetails = async (req, res) => {
       }
 };
 
-const storage = multer.diskStorage({
-    destination: (req, file, cb) => {
-        cb(null, 'uploads/'); // Setting the directory for storing uploaded images
-    },
-    filename: (req, file, cb) => {
-        cb(null, Date.now() + '-' + file.originalname);  // Using Date.now() for unique filenames
-    }
-});
 
-const upload = multer({ storage: storage }).single('image');
+
+
 
 exports.createProduct = (req, res) => {
     upload(req, res, async (err) => {
         if (err) {
-            console.error('Error:', err);
-            if (err instanceof multer.MulterError) {
-                return res.status(500).send("Multer error: " + err.message);
-            } else {
-                return res.status(500).send("Upload Error: " + err.message);
-            }
+            return res.status(500).send(err.message);
         }
-
-        const fs = require('fs');
-        const imageBuffer = fs.readFileSync(req.file.path);
-
+        if (!req.file) {
+            return res.status(400).send('No file uploaded.');
+        }
+        
+        const imageStream = req.file.buffer;
+        
+        cloudinary.uploader.upload_stream({ resource_type: 'auto' }, async (error, result) => {
+            if (error) {
+                return res.status(500).send('Upload to Cloudinary failed');
+            }
         const newProduct = new Product({
             name: req.body.name,
             price: req.body.price,
@@ -78,11 +81,9 @@ exports.createProduct = (req, res) => {
             category:req.body.category,
             description: req.body.description,
             productImage: {
-                name: req.file.filename,
-                image: {
-                    data: imageBuffer,
-                    contentType: req.file.mimetype
-                }
+                url: result.secure_url,
+                publicId: result.public_id,
+                version: result.version
             }
         });
 
@@ -93,5 +94,6 @@ exports.createProduct = (req, res) => {
             console.error('Database error:', saveErr.message);
             res.status(500).send("Server error: Failed to save product to the database");
         }
+        }).end(imageStream);
     });
 };

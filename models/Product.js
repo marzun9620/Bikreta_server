@@ -1,15 +1,6 @@
 const mongoose = require('mongoose');
 
-const imageSchema = mongoose.Schema({
-    name: {
-        type: String,
-        required: true
-    },
-    image: {
-        data: Buffer,
-        contentType: String
-    }
-});
+
 
 const ratingSchema = new mongoose.Schema({
     user: {
@@ -54,7 +45,11 @@ name: {
         type: String,
         required: true
     },
-    productImage: imageSchema,
+    productImage: {
+        url: String,         
+        publicId: String,     
+        version: String       
+    },
 	
     ratings: [ratingSchema],
     averageRating: {

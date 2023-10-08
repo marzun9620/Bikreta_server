@@ -2,7 +2,7 @@ const mongoose=require('mongoose');
 require('dotenv').config();
 
 
-const url=`mongodb+srv://enamulMarzun:shamsun99@cluster0.aoy5j7e.mongodb.net/marzun?retryWrites=true&w=majority`;
+const url=process.env.DATABASE;
 
 
 

@@ -40,6 +40,11 @@ const productSchema = new mongoose.Schema({
     avgRating: {
         type: Number,
         default: 0
+    },
+    productPhoto:{
+        url: String,         
+        publicId: String,     
+        version: String       
     }
 });
 

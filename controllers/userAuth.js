@@ -44,7 +44,7 @@ const auth = async (req, res) => {
         const token = user.generateAuthToken();
         res.status(200).send({
             data: token,
-            userName: user.firstName,
+            userName: user.fullName,
             userId: user._id.toString(),
             message: "logged in successfully"
         });

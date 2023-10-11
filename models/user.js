@@ -7,12 +7,13 @@ require('dotenv').config();
 
 
 const userSchema = new mongoose.Schema({
-	firstName: { type: String, required: true },
-	lastName: { type: String, required: true },
-	location: { type: String, required: true },
+	fullName: { type: String, required: true },
     shopName: { type: String, required: true },
 	email: { type: String, required: true, unique: true },
 	password: { type: String, required: true },
+	districts: { type: String, required: true },
+	thana: { type: String, required: true },
+	houseNo: { type: String, required: true },
 	verified: { type: Boolean, default: false },
 	profilePhoto: {
         url: String,         
@@ -36,8 +37,7 @@ const validate = (data) => {
         max: 255,
     };
 	const schema = Joi.object({
-		firstName: Joi.string().required().label("First Name"),
-		lastName: Joi.string().required().label("Last Name"),
+		fullName: Joi.string().required().label("First Name"),
 		location: Joi.string().required().label("Location"),
         shopName: Joi.string().required().label("Shop Name"),
 		email: Joi.string().email().required().label("email"),

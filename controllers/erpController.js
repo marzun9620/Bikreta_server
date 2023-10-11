@@ -65,6 +65,7 @@ const addProducts = (req, res) => {
             if (error) {
                 return res.status(500).send('Upload to Cloudinary failed');
             }
+            console.log(req.body.category);
         const newProduct = new Product({
             productName: req.body.productName,
             description: req.body.description,

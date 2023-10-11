@@ -3,7 +3,7 @@ const productController = require('../controllers/productController');
 const Product = require('../models/Product');
 const router = express.Router();
 
-router.route(`/image/:productId`).get(productController.getAllProducts);
+//router.route(`/image/:productId`).get(productController.getAllProducts);
 router.route('/').get(productController.getAllProducts1);
 router.route('/').post(productController.createProduct);
 router.route('/details/:id').get(productController.productDetails);
@@ -11,11 +11,26 @@ router.route('/details/:id').get(productController.productDetails);
  // Assuming your model is one directory up
 
 // Fetch products by category
+router.get('/image/:productId',async(req,res)=>{
+  console.log(222);
+  try {
+      const product = await Product.findById(req.params.productId);
+      if (!product || !product.productPhoto) {
+          throw new Error('No product image found');
+      }
+      res.redirect(product.productPhoto.url);
+  } catch (error) {
+      console.error('Error:', error);
+      res.status(404).send('Not Found');
+  }
+
+});
 router.get('/category/:category', async (req, res) => {
   try {
     const products = await Product.find({ category: req.params.category });
     res.json(products);
-    //console.log(products);
+   // console.log(products);
+    //console.log(1);
   } catch (err) {
    
     res.status(500).json({ message: err.message });

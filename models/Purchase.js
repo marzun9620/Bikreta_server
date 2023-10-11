@@ -13,18 +13,33 @@ const purchaseSchema = new mongoose.Schema({
     },
     transactionId: {
         type: String,
-        required: true,
+       
         unique: true
     },
-    date: {
+   expectedDeliveryDate: {
         type: Date,
-        default: Date.now
+    },
+    actualDeliveryDate: {
+        type: Date,
+    },
+    orderStatus:{
+          type:String,
+          
+    },
+    trackingId: {
+        type: String,
+       
+        unique: true
     },
     quantity: {
         type: Number,
         required: true,
         min: 1  // Assuming the minimum quantity one can purchase is 1
-    }
+    },
+    discountId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Discount'
+      }
 });
 
 const Purchase = mongoose.model("Purchase", purchaseSchema);

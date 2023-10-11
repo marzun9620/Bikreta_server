@@ -19,6 +19,7 @@ cloudinary.config({
 const upload = multer({ storage: multer.memoryStorage() }).single('profilePhoto');
 
 const user = async (req, res) => {
+    console.log(req.body);
     upload(req, res, async (err) => {
         if (err) {
             return res.status(500).send(err.message);
@@ -35,14 +36,15 @@ const user = async (req, res) => {
             }
             
            
-            
+            console.log(2223);
             const newUser = new User({
-                firstName: req.body.firstName,
-                lastName: req.body.lastName,
+                fullName: req.body.fullName,
                 shopName: req.body.shopName,
-                location: req.body.location,
                 email: req.body.email,
                 password: req.body.password,
+                districts: req.body.districts,
+                thana: req.body.thana,
+                houseNo: req.body.houseNo,
                 profilePhoto: {
                     url: result.secure_url,
                     publicId: result.public_id,

@@ -26,16 +26,7 @@ exports.getAllProducts1=async (req, res) => {
  
 
 exports.getAllProducts = async (req, res) => {
-    try {
-        const product = await Product.findById(req.params.productId);
-        if (!product || !product.productImage) {
-            throw new Error('No product image found');
-        }
-        res.redirect(product.productImage.url);
-    } catch (error) {
-        console.error('Error:', error);
-        res.status(404).send('Not Found');
-    }
+   
 };
 exports.productDetails = async (req, res) => {
     try {

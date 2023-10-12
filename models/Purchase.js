@@ -39,6 +39,12 @@ const purchaseSchema = new mongoose.Schema({
     discountId: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Discount'
+      },
+      totalMakingCost:{
+        type: Number
+      },
+      totalPaid:{
+        type:Number
       }
 });
 

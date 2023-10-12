@@ -15,6 +15,11 @@ const productSchema = new mongoose.Schema({
         required: true,
         min: 0
     },
+    unitMakeCost:{
+        type:Number,
+        required:true,
+        min:0
+    },
     cartonSize: {
         type: Number,
         required: true
@@ -33,13 +38,33 @@ const productSchema = new mongoose.Schema({
         type: String,
         ref: 'Category'
     },
-    ratingCount: {
+    averageRating: {
         type: Number,
         default: 0
     },
-    avgRating: {
+    numberOfRatings: {
         type: Number,
         default: 0
+    },
+    ratings: [
+        {
+            user: {
+                type: mongoose.Schema.Types.ObjectId,
+                ref: 'User'
+            },
+            ratingValue: {
+                type: Number,
+                min: 1,
+                max: 5
+            }
+        }
+    ],
+    starCounts: {
+        1: { type: Number, default: 0 },
+        2: { type: Number, default: 0 },
+        3: { type: Number, default: 0 },
+        4: { type: Number, default: 0 },
+        5: { type: Number, default: 0 }
     },
     productPhoto:{
         url: String,         

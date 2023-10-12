@@ -70,6 +70,7 @@ const addProducts = (req, res) => {
             productName: req.body.productName,
             description: req.body.description,
             unitPrice: req.body.unitPrice,
+            unitMakeCost: req.body.unitMakeCost,
             category:req.body.category,
             cartonSize: req.body.cartonSize,
             cartonStock: req.body.cartonStock,

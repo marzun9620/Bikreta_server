@@ -39,13 +39,17 @@ const purchaseProduct = async (req, res) => {
             { "user": userId, "items._id": itemId },
             { "$set": { "items.$.isBought": true } }
         );
+        const p = await Product.findOne({ _id: productId });
 
         // Save the purchase in the Purchase model
         const purchase = new Purchase({
             userId,
             productId,
             transactionId: generateTransactionId(),
-            quantity
+            quantity,
+            totalMakingCost:(p.unitMakingCost * quantity),
+            totalPaid:(p.unitPrice * quantity)
+
         });
 
         await purchase.save();

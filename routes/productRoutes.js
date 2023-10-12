@@ -37,7 +37,6 @@ router.get('/category/:category', async (req, res) => {
   }
 });
 
-
 router.post("/:productId/rate", async (req, res) => {
   try {
       const { userId, ratingValue } = req.body;
@@ -52,6 +51,14 @@ router.post("/:productId/rate", async (req, res) => {
       
       product.ratings.push(newRating);
 
+      // Update the star count for the given rating value
+      if(product.starCounts && product.starCounts[ratingValue]) {
+          product.starCounts[ratingValue] += 1;
+      } else {
+          // In case starCounts isn't defined or the specific rating value doesn't exist (this shouldn't happen, but just to be safe)
+          product.starCounts = { ...product.starCounts, [ratingValue]: 1 }
+      }
+
       const totalRatings = product.ratings.length;
       const totalRatingValue = product.ratings.reduce((acc, curr) => acc + curr.ratingValue, 0);
       
@@ -62,9 +69,11 @@ router.post("/:productId/rate", async (req, res) => {
       
       res.send({ message: "Rating added successfully!" });
   } catch (error) {
+      console.error(error);
       res.status(500).send("Server error");
   }
 });
+
 
 router.get("/search", async (req, res) => {
   try {

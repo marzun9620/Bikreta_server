@@ -30,14 +30,16 @@ exports.getAllProducts = async (req, res) => {
 };
 exports.productDetails = async (req, res) => {
     try {
+        console.log(req.params.id);
         const productId = req.params.id;
-        
+
         const product = await Product.findById(productId);
+      
         
         if (!product) {
           return res.status(404).json({ message: "Product not found" });
         }
-        
+    
         res.json(product);
         
       } catch (error) {

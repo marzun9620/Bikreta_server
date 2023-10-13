@@ -22,14 +22,12 @@ const purchaseSchema = new mongoose.Schema({
     actualDeliveryDate: {
         type: Date,
     },
+    orderPlacedDate:{
+        type: Date,
+    },
     orderStatus:{
           type:String,
           
-    },
-    trackingId: {
-        type: String,
-       
-        unique: true
     },
     quantity: {
         type: Number,

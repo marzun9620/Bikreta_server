@@ -12,7 +12,7 @@ router.route('/details/:id').get(productController.productDetails);
 
 // Fetch products by category
 router.get('/image/:productId',async(req,res)=>{
-  console.log(222);
+  //console.log(222);
   try {
       const product = await Product.findById(req.params.productId);
       if (!product || !product.productPhoto) {

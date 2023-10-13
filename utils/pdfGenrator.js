@@ -32,7 +32,7 @@ const generatePDF = async (purchase, userId, productId) => {
 
             // Invoice Date
             doc.fontSize(15)
-               .text(`Invoice Date: ${new Date(purchase.date).toLocaleDateString()}`, { align: "right" })
+               .text(`Invoice Date: ${new Date(purchase.orderPlacedDate).toLocaleDateString()}`, { align: "right" })
                .moveDown();
 
             // Company Information
@@ -56,8 +56,8 @@ const generatePDF = async (purchase, userId, productId) => {
                .moveDown(0.5)
                .fontSize(10)
                .fillColor('#444')
-               .text(`${user.firstName} ${user.lastName}`)
-               .text(`Address: ${user.location}`)
+               .text(`${user.fullName}`)
+               .text(`Address: District:${user.districts} . Thana:${user.thana}. House NO: ${user.houseNo}`)
                .text(`Email: ${user.email}`)
                .moveDown(2);
 
@@ -73,16 +73,16 @@ const generatePDF = async (purchase, userId, productId) => {
             doc.moveDown(1.5)
                .fillColor('#555')
                .fontSize(12)
-               .text(product.name, 50, doc.y)
-               .text(`$${product.price}`, 250, doc.y)
+               .text(product.productName, 50, doc.y)
+               .text(`$${product.unitPrice}`, 250, doc.y)
                .text(purchase.quantity.toString(), 350, doc.y)
-               .text(`$${product.price * purchase.quantity}`, 450, doc.y)
+               .text(`$${product.unitPrice * purchase.quantity}`, 450, doc.y)
                .moveDown(2);
 
             // Total Amount
             doc.fillColor('#555')
                .fontSize(15)
-               .text(`Total Amount: $${product.price * purchase.quantity}`, { align: 'right' })
+               .text(`Total Amount: $${product.unitPrice * purchase.quantity}`, { align: 'right' })
                .moveDown(3);
 
             // Footer

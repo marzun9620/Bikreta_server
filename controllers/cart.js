@@ -40,14 +40,23 @@ const purchaseProduct = async (req, res) => {
             { "$set": { "items.$.isBought": true } }
         );
         const p = await Product.findOne({ _id: productId });
+        const currentDate = new Date();
+const expectedDelivery = new Date();
+expectedDelivery.setDate(currentDate.getDate() + 7);
 
+
+        //console.log(p);
         // Save the purchase in the Purchase model
         const purchase = new Purchase({
             userId,
             productId,
             transactionId: generateTransactionId(),
+            expectedDeliveryDate: expectedDelivery,
+            actualDeliveryDate: expectedDelivery,
+            orderPlacedDate: currentDate,
+            orderStatus:'Placed',
             quantity,
-            totalMakingCost:(p.unitMakingCost * quantity),
+            totalMakeCost:(p.unitMakingCost * quantity),
             totalPaid:(p.unitPrice * quantity)
 
         });

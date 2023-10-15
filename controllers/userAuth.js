@@ -8,18 +8,18 @@ const Joi = require("joi");
 
 const auth = async (req, res) => {
     try {
-        console.log(req.body)
+        //console.log(req.body)
         const { error } = validate(req.body);
         if (error) return res.status(400).send({ message: error.details[0].message });
 
         const user = await User.findOne({ email: req.body.email });
         if (!user) return res.status(401).send({ message: "Invalid Email or Password" });
-         console.log(user);
+       //  console.log(user);
          
           if (user.password === req.body.password) {
             
         } else {
-            console.log(2);
+          //  console.log(2);
 			return res.status(401).send({ message: "Invalid Email or Password" });
         }
     		

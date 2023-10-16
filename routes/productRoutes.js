@@ -1,6 +1,8 @@
 const express = require('express');
 const productController = require('../controllers/productController');
 const Product = require('../models/Product');
+const User = require('../models/user');
+const Purchase = require('../models/Purchase');
 const router = express.Router();
 
 //router.route(`/image/:productId`).get(productController.getAllProducts);
@@ -36,6 +38,21 @@ router.get('/category/:category', async (req, res) => {
     res.status(500).json({ message: err.message });
   }
 });
+
+router.get('/status/:filter', async (req, res) => {
+  const status = req.params.filter;
+
+  try {
+      const orders = await Purchase.find({ orderStatus: status })
+                                   .populate('productId userId');
+      console.log(orders)
+      res.json(orders);
+  } catch (error) {
+      res.status(500).send('Error fetching orders:', error.message);
+  }
+});
+
+
 
 router.post("/:productId/rate", async (req, res) => {
   try {

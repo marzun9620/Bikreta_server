@@ -34,7 +34,7 @@ router.get('/user/orders/:id', async (req, res) => {
   const userId = req.params.id;
 
   try {
-      const purchases = await Purchase.find({ userId: new ObjectId(userId) })
+      const purchases = await Purchase.find({ userId })
           .populate('productId')
           .populate('discountId')
           .exec();

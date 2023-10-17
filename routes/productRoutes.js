@@ -40,15 +40,32 @@ router.get('/category/:category', async (req, res) => {
 });
 
 router.get('/status/:filter', async (req, res) => {
-  const status = req.params.filter;
+  const { filter } = req.params;
+  const { category, sortType } = req.query;
+
+  let query = { orderStatus: filter };
+
+  if (category && category !== "All") {
+    const matchingProducts = await Product.find({ category }).select('_id');
+    const productIds = matchingProducts.map(product => product._id);
+    query.productId = { $in: productIds };
+  }
 
   try {
-      const orders = await Purchase.find({ orderStatus: status })
-                                   .populate('productId userId');
-      console.log(orders)
-      res.json(orders);
+    let orders = await Purchase.find(query).populate('productId userId');
+
+    if (sortType === "date") {
+      orders.sort((a, b) => new Date(b.orderPlacedDate) - new Date(a.orderPlacedDate));
+    } else if (sortType === "upcomingWeek") {
+      const oneWeekFromNow = new Date();
+      oneWeekFromNow.setDate(oneWeekFromNow.getDate() + 7);
+      orders = orders.filter((order) => new Date(order.expectedDeliveryDate) <= oneWeekFromNow);
+    }
+
+    res.json({ success: true, data: orders });
   } catch (error) {
-      res.status(500).send('Error fetching orders:', error.message);
+    console.error('Error fetching orders:', error.message);
+    res.status(500).json({ success: false, message: 'Internal Server Error' });
   }
 });
 

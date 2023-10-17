@@ -1,74 +1,73 @@
 const router = require("express").Router();
-
 require('dotenv').config();
+
 const { User, validate } = require("../models/user");
 const Token = require("../models/token");
 const crypto = require("crypto");
 const sendEmail = require("../utils/sendEmail");
 const bcrypt = require("bcrypt");
-const fs = require('fs');
-
 const multer = require('multer');
 
-const storage = multer.diskStorage({
-    destination: (req, file, cb) => {
-        cb(null, 'userPictures/'); // Setting the directory for storing uploaded images
-    },
-    filename: (req, file, cb) => {
-        cb(null, Date.now() + '-' + file.originalname);  // Using Date.now() for unique filenames
-    }
+const cloudinary = require('cloudinary').v2;
+          
+cloudinary.config({ 
+  cloud_name: 'dvt7ktdue', 
+  api_key: '343128951383287', 
+  api_secret: '86-oV6lIZFuMi6PtLM_oi2bKn50' 
 });
 
-const upload = multer({ storage: storage }).single('profilePhoto');
-
+const upload = multer({ storage: multer.memoryStorage() }).single('profilePhoto');
 
 const user = async (req, res) => {
-   // console.log(req.body);
+    console.log(req.body);
     upload(req, res, async (err) => {
         if (err) {
-            console.error('Error:', err);
-            if (err instanceof multer.MulterError) {
-                return res.status(500).send("Multer error: " + err.message);
-            } else {
-                return res.status(500).send("Upload Error: " + err.message);
-            }
+            return res.status(500).send(err.message);
         }
-
-        const salt = await bcrypt.genSalt(Number(process.env.SALT));
-        const hashedPassword = await bcrypt.hash(req.body.password, salt);
-
-        const newUser = new User({
-            firstName: req.body.firstName,
-            lastName: req.body.lastName,
-            shopName:req.body.shopName,
-            location:req.body.location,
-            email: req.body.email,
-            password: hashedPassword,
-            profilePhoto: {
-                name: req.file.filename,
-                image: {
-                    data: fs.readFileSync(req.file.path),
-                    contentType: req.file.mimetype
+        if (!req.file) {
+            return res.status(400).send('No file uploaded.');
+        }
+        
+        const imageStream = req.file.buffer;
+        
+        cloudinary.uploader.upload_stream({ resource_type: 'auto' }, async (error, result) => {
+            if (error) {
+                return res.status(500).send('Upload to Cloudinary failed');
+            }
+            
+           
+            console.log(2223);
+            const newUser = new User({
+                fullName: req.body.fullName,
+                shopName: req.body.shopName,
+                email: req.body.email,
+                password: req.body.password,
+                districts: req.body.districts,
+                thana: req.body.thana,
+                houseNo: req.body.houseNo,
+                profilePhoto: {
+                    url: result.secure_url,
+                    publicId: result.public_id,
+                    version: result.version
                 }
+            });
+
+            try {
+                await newUser.save();
+
+                const token = await new Token({
+                    userId: newUser._id,
+                    token: crypto.randomBytes(32).toString("hex"),
+                }).save();
+
+                const url = `http://localhost:3000/api/users/${newUser.id}/verify/${token.token}`;
+                await sendEmail(newUser.email, "Verify Email", url);
+
+                res.status(201).send({ message: "An Email sent to your account please verify" });
+            } catch (saveErr) {
+                res.status(500).send("Server error: Failed to save user to the database");
             }
-        });
-
-        try {
-            await newUser.save();
-
-            const token = await new Token({
-                userId: newUser._id,
-                token: crypto.randomBytes(32).toString("hex"),
-            }).save();
-
-            const url = `http://localhost:3000/api/users/${newUser.id}/verify/${token.token}`;
-            await sendEmail(newUser.email, "Verify Email", url);
-
-            res.status(201).send({ message: "An Email sent to your account please verify" });
-        } catch (saveErr) {
-            console.error('Database error:', saveErr.message);
-            res.status(500).send("Server error: Failed to save user to the database");
-        }
+        }).end(imageStream);
     });
 };
 
@@ -92,7 +91,6 @@ const emailVar = async (req, res) => {
         res.status(500).send({ message: "Internal Server Error" });
     }
 };
-
 
 module.exports = {
   user,

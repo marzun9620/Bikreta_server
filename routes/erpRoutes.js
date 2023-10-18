@@ -33,6 +33,7 @@ router.get('/total-cost', async (req, res) => {
   router.get('/total-making-cost', async (req, res) => {
     try {
       const totalMakingCost = await Purchase.aggregate([
+        { $match: { orderStatus: "Placed" } },
         { $group: { _id: null, sum: { $sum: "$totalMakeCost" } } }
       ]);
   

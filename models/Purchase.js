@@ -38,7 +38,7 @@ const purchaseSchema = new mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Discount'
       },
-      totalMakingCost:{
+      totalMakeCost:{
         type: Number
       },
       totalPaid:{

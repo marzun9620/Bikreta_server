@@ -1,6 +1,8 @@
 const {Router}=require('express');
 const Purchase = require('../models/Purchase');  // Assuming Mongoose Model name is Purchase
 const {User} = require('../models/user');
+const Product = require('../models/Product');
+const Category=require('../models/Catagory')  // Assuming the path to the product model
 const router =Router();
 const {
     addCategory,
@@ -59,4 +61,47 @@ router.get('/total-cost', async (req, res) => {
       res.status(500).send('Server Error');
     }
   });
+
+
+// Search products
+router.get('/products/search', async (req, res) => {
+    try {
+        const query = req.query.q;
+        if (!query) {
+            return res.status(400).send({ error: 'Search query is required' });
+        }
+
+        const products = await Product.find({
+            productName: new RegExp(query, 'i')
+        });
+
+        return res.status(200).send(products);
+
+    } catch (err) {
+        return res.status(500).send({ error: 'Internal Server Error' });
+    }
+});
+// Assuming you've already required express, router, and the Category model
+
+// Search categories
+router.get('/categories/search', async (req, res) => {
+  try {
+      const query = req.query.q;
+      if (!query) {
+          return res.status(400).send({ error: 'Search query is required' });
+      }
+
+      const categories = await Category.find({
+          name: new RegExp(query, 'i')
+      });
+
+      return res.status(200).send(categories);
+
+  } catch (err) {
+      return res.status(500).send({ error: 'Internal Server Error' });
+  }
+});
+
+// ... other routes
+
 module.exports=router;

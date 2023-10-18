@@ -56,7 +56,7 @@ expectedDelivery.setDate(currentDate.getDate() + 7);
             orderPlacedDate: currentDate,
             orderStatus:'Placed',
             quantity,
-            totalMakeCost:(p.unitMakingCost * quantity),
+            totalMakeCost:(p.unitMakeCost * quantity),
             totalPaid:(p.unitPrice * quantity)
 
         });

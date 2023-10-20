@@ -43,6 +43,9 @@ const purchaseSchema = new mongoose.Schema({
       },
       totalPaid:{
         type:Number
+      },
+      paymentStatus:{
+        type:String
       }
 });
 

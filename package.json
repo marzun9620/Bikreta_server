@@ -33,6 +33,7 @@
     "nodemailer": "^6.9.5",
     "nodemon": "^2.0.15",
     "pdfkit": "^0.13.0",
-    "puppeteer": "^21.3.6"
+    "puppeteer": "^21.3.6",
+    "sslcommerz-lts": "^1.1.0"
   }
 }

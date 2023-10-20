@@ -4,26 +4,22 @@ const Joi = require("joi");
 const passwordComplexity = require("joi-password-complexity");
 require('dotenv').config();
 
-const imageSchema = new mongoose.Schema({
-    name: {
-        type: String,
-        required: true
-    },
-    image: {
-        data: Buffer,
-        contentType: String
-    }
-});
+
 
 const userSchema = new mongoose.Schema({
-	firstName: { type: String, required: true },
-	lastName: { type: String, required: true },
-	location: { type: String, required: true },
+	fullName: { type: String, required: true },
     shopName: { type: String, required: true },
 	email: { type: String, required: true, unique: true },
 	password: { type: String, required: true },
+	districts: { type: String, required: true },
+	thana: { type: String, required: true },
+	houseNo: { type: String, required: true },
 	verified: { type: Boolean, default: false },
-	profilePhoto: imageSchema,
+	profilePhoto: {
+        url: String,         
+        publicId: String,     
+        version: String       
+    },
 });
 
 userSchema.methods.generateAuthToken = function () {
@@ -41,8 +37,7 @@ const validate = (data) => {
         max: 255,
     };
 	const schema = Joi.object({
-		firstName: Joi.string().required().label("First Name"),
-		lastName: Joi.string().required().label("Last Name"),
+		fullName: Joi.string().required().label("First Name"),
 		location: Joi.string().required().label("Location"),
         shopName: Joi.string().required().label("Shop Name"),
 		email: Joi.string().email().required().label("email"),

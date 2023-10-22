@@ -19,7 +19,7 @@ const auth = async (req, res) => {
           if (user.password === req.body.password) {
             
         } else {
-          //  console.log(2);
+            console.log(2);
 			return res.status(401).send({ message: "Invalid Email or Password" });
         }
     		

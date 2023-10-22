@@ -4,20 +4,20 @@ require('dotenv').config();
 module.exports = async (email, subject, text) => {
     try {
         const transporter = nodemailer.createTransport({
-            service: 'gmail', // since you're using gmail
-			port:587,
-			secure:true,
-			logger:true,
-			secureConnection:false,
+            service: 'gmail',
             auth: {
-                user:'emim9620@gmail.com',
-                pass:'cruuryieuowqyjst' // this should be your App password
-            },
-			
+                type: 'OAuth2',
+                user: process.env.GMAIL_USER,
+                clientId: process.env.OAUTH_CLIENTID,
+                clientSecret: process.env.OAUTH_CLIENT_SECRET,
+                refreshToken: process.env.OAUTH_REFRESH_TOKEN,
+                accessToken: process.env.OAUTH_ACCESS_TOKEN
+            }
         });
+        
 
         const mailOptions = {
-            from: process.env.USER,
+            from: process.env.GMAIL_USER,
             to: email,
             subject: subject,
             text: text

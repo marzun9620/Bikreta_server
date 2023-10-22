@@ -5,103 +5,117 @@ const fs = require('fs');
 const { User } = require('../models/user');
 const Product = require('../models/Product');
 
+
 const generatePDF = async (purchase, userId, productId) => {
-    return new Promise(async (resolve, reject) => {
-        try {
-            const user = await User.findOne({ _id: userId });
-            if (!user) {
-                reject(new Error("User not found"));
-                return;
-            }
+   return new Promise(async (resolve, reject) => {
+       try {
+           const user = await User.findOne({ _id: userId });
+           if (!user) {
+               reject(new Error("User not found"));
+               return;
+           }
 
-            const product = await Product.findOne({ _id: productId });
-            if (!product) {
-                reject(new Error("Product not found"));
-                return;
-            }
+           const product = await Product.findOne({ _id: productId });
+           if (!product) {
+               reject(new Error("Product not found"));
+               return;
+           }
 
-            const doc = new PDFDocument({ margin: 50 });
-            const pdfPath = path.join(__dirname, '..', 'public', 'pdfs', `${purchase.transactionId}.pdf`);
-            const writeStream = fs.createWriteStream(pdfPath);
-            doc.pipe(writeStream);
+           const doc = new PDFDocument({ margin: 50 });
+           const pdfPath = path.join(__dirname, '..', 'public', 'pdfs', `${purchase.transactionId}.pdf`);
+           const writeStream = fs.createWriteStream(pdfPath);
+           doc.pipe(writeStream);
+          
+           // Header
+           doc.fillColor('#444')
+              .fontSize(20)
+              .font('Helvetica-Bold')
+              .text('BIKRETA', 50, 40)
+              .fontSize(15)
+              .text('INVOICE', 50, 70)
+              .text(`Invoice #: ${purchase.transactionId}`, 50, 95, { align: "right" })
+              .fontSize(10)
+              .text(`Date: ${new Date().toLocaleDateString()}`, 50, 115, { align: "right" })
+              .moveDown();
 
-            // Header
-            doc.fontSize(25)
-               .fillColor('#444')
-               .text(`Invoice #${purchase.transactionId}`, 50, 50, { align: "center" });
+           // Company Info
+           doc.fontSize(15)
+              .text(user.shopName, 50, 140)
+              .fontSize(10)
+              .text(user.location)
+              .text(`Email: ${user.email}`, { underline: true })
+              .moveDown(2);
 
-            // Invoice Date
-            doc.fontSize(15)
-               .text(`Invoice Date: ${new Date(purchase.orderPlacedDate).toLocaleDateString()}`, { align: "right" })
-               .moveDown();
+           // Divider Line
+           doc.strokeColor('#aaa')
+              .lineWidth(1)
+              .moveTo(50, 200)
+              .lineTo(550, 200)
+              .stroke();
 
-            // Company Information
-            doc.moveDown(2)
-               .strokeColor("#aaa")
-               .lineWidth(5)
-               .moveTo(50, doc.y)
-               .lineTo(550, doc.y)
-               .stroke()
-               .moveDown(1);
-            doc.fontSize(10)
-               .text(user.shopName)
-               .text(user.location, { align: "right" })
-               .text(user.email, { align: "right" })
-               .moveDown(2);
+           // Bill To
+           doc.moveDown(2.5)
+              .fontSize(15)
+              .text("Bill To:", 50, 220)
+              .fontSize(12)
+              .text(`${user.fullName}`)
+              .text(`District: ${user.districts}, Thana: ${user.thana}, House NO: ${user.houseNo}`, 50, 250)
+              .text(`Email: ${user.email}`)
+              .moveDown(2);
 
-            // Bill To
-            doc.fontSize(15)
-               .fillColor('#888')
-               .text("Bill To:")
-               .moveDown(0.5)
-               .fontSize(10)
-               .fillColor('#444')
-               .text(`${user.fullName}`)
-               .text(`Address: District:${user.districts} . Thana:${user.thana}. House NO: ${user.houseNo}`)
-               .text(`Email: ${user.email}`)
-               .moveDown(2);
+           // Products Table Headers
+           const tableHeadersY = 300;
+           doc.fontSize(15)
+              .text("Product", 50, tableHeadersY)
+              .text("Price", 280, tableHeadersY)
+              .text("Quantity", 380, tableHeadersY)
+              .text("Total", 480, tableHeadersY)
+              .moveDown(1)
+              .strokeColor('#aaa')
+              .lineWidth(1)
+              .moveTo(50, 325)
+              .lineTo(550, 325)
+              .stroke();
 
-            // Products Table
-            doc.fillColor('#444')
-               .fontSize(15)
-               .text("Product", 50)
-               .text("Price", 250)
-               .text("Quantity", 350)
-               .text("Total", 450);
+           // Product Line Item
+           const productLineY = 340;
+           doc.fontSize(12)
+              .text(product.productName, 50, productLineY)
+              .text(`${product.unitPrice.toFixed(2)} Tk`, 280, productLineY)
+              .text(purchase.quantity.toString(), 380, productLineY)
+              .text(`${(product.unitPrice * purchase.quantity).toFixed(2)} Tk`, 480, productLineY);
 
-            // Table Rows
-            doc.moveDown(1.5)
-               .fillColor('#555')
-               .fontSize(12)
-               .text(product.productName, 50, doc.y)
-               .text(`$${product.unitPrice}`, 250, doc.y)
-               .text(purchase.quantity.toString(), 350, doc.y)
-               .text(`$${product.unitPrice * purchase.quantity}`, 450, doc.y)
-               .moveDown(2);
+           // Divider Line for Total
+           doc.strokeColor('#aaa')
+              .lineWidth(1)
+              .moveTo(50, 375)
+              .lineTo(550, 375)
+              .stroke();
 
-            // Total Amount
-            doc.fillColor('#555')
-               .fontSize(15)
-               .text(`Total Amount: $${product.unitPrice * purchase.quantity}`, { align: 'right' })
-               .moveDown(3);
+           // Total Amount
+           doc.fontSize(15)
+              .text(`Total Amount: ${(product.unitPrice * purchase.quantity).toFixed(2)} Tk`, 380, 395)
+              .moveDown(3);
 
-            // Footer
-            doc.fontSize(10)
-               .fillColor('black')
-               .text("Thank you for your purchase!", 50, 700, { align: 'center' });
+           // Footer
+           doc.fontSize(10)
+              .fillColor('black')
+              .text("Thank you for shopping with BIKRETA!", 50, 750, { align: 'center' })
+              .text("For any queries, reach out at support@bikreta.com", 50, 770, { align: 'center' });
 
-            // Finalize the PDF
-            doc.end();
+           // End the PDF
+           doc.end();
 
-            writeStream.on('finish', () => {
-                resolve(`/pdfs/${purchase.transactionId}.pdf`);
-            });
+           writeStream.on('finish', () => {
+               resolve(`/pdfs/${purchase.transactionId}.pdf`);
+           });
 
-        } catch (error) {
-            reject(error);
-        }
-    });
+       } catch (error) {
+           reject(error);
+       }
+   });
 };
+
 
 module.exports = {
     generatePDF

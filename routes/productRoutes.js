@@ -1,6 +1,8 @@
 const express = require('express');
 const productController = require('../controllers/productController');
 const Product = require('../models/Product');
+const User = require('../models/user');
+const Purchase = require('../models/Purchase');
 const router = express.Router();
 
 //router.route(`/image/:productId`).get(productController.getAllProducts);
@@ -36,6 +38,38 @@ router.get('/category/:category', async (req, res) => {
     res.status(500).json({ message: err.message });
   }
 });
+
+router.get('/status/:filter', async (req, res) => {
+  const { filter } = req.params;
+  const { category, sortType } = req.query;
+
+  let query = { orderStatus: filter };
+
+  if (category && category !== "All") {
+    const matchingProducts = await Product.find({ category }).select('_id');
+    const productIds = matchingProducts.map(product => product._id);
+    query.productId = { $in: productIds };
+  }
+
+  try {
+    let orders = await Purchase.find(query).populate('productId userId');
+
+    if (sortType === "date") {
+      orders.sort((a, b) => new Date(b.orderPlacedDate) - new Date(a.orderPlacedDate));
+    } else if (sortType === "upcomingWeek") {
+      const oneWeekFromNow = new Date();
+      oneWeekFromNow.setDate(oneWeekFromNow.getDate() + 7);
+      orders = orders.filter((order) => new Date(order.expectedDeliveryDate) <= oneWeekFromNow);
+    }
+
+    res.json({ success: true, data: orders });
+  } catch (error) {
+    console.error('Error fetching orders:', error.message);
+    res.status(500).json({ success: false, message: 'Internal Server Error' });
+  }
+});
+
+
 
 router.post("/:productId/rate", async (req, res) => {
   try {

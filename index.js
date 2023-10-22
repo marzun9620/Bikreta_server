@@ -12,7 +12,10 @@ const graph = require('./controllers/graph');
 const erp = require('./routes/erpRoutes');
 
 
-
+const { graphqlHTTP } = require('express-graphql');
+const mongoose = require('mongoose');
+const graphqlSchema = require('./controllers/graphqlSchema');
+const Purchase=require('./models/Purchase');
 // Connect to the database (assuming your connection module exports a function)
 // connection();
 
@@ -35,6 +38,7 @@ app.use("/product/cart", addToCartRoute);
 
 app.use("/bar", graph);
 
+
 app.use('/api/products', productRoutes);
 app.use("/marzun/cart/", addToCartRoute);
 //console.log(__dirname);
@@ -44,8 +48,42 @@ app.use('/erp', erp);
 app.use('/pdfs/', express.static(path.join(__dirname, 'public', 'pdfs')));
 
 
-
-
+app.use('/graphql1', graphqlHTTP(req => {
+  const startTime = Date.now();
+  return {
+      schema: graphqlSchema,
+      graphiql: true,
+      extensions({ document, variables, operationName, result }) {
+          return { runTime: Date.now() - startTime };
+      },
+      formatError: error => {
+          console.error(error);
+          return {
+              message: error.message,
+              locations: error.locations,
+              stack: error.stack,
+              path: error.path
+          };
+      }
+  };
+}));
+app.post('/okk/:tran_id', async(req,res)=>{
+ 
+    const result = await Purchase.updateOne(
+      {transactionId: req.params.tran_id},
+      {
+        $set:{
+          paymentStatus:"true",
+        },
+      }
+    );
+    console.log('jii');
+    if(result.modifiedCount>=0){
+      res.redirect(
+        `localhost:3006`
+      );
+    };
+  })
 
 
 // Start the server

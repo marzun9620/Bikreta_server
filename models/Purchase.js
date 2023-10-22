@@ -3,7 +3,7 @@ const mongoose = require("mongoose");
 const purchaseSchema = new mongoose.Schema({
     userId: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'User',
+        ref: 'user',
         required: true
     },
     productId: {
@@ -38,11 +38,14 @@ const purchaseSchema = new mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Discount'
       },
-      totalMakingCost:{
+      totalMakeCost:{
         type: Number
       },
       totalPaid:{
         type:Number
+      },
+      paymentStatus:{
+        type:String
       }
 });
 

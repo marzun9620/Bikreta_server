@@ -16,7 +16,7 @@ const {
     user,
     emailVar
   } = require('../controllers/createUser');
-  
+  const { User } = require('../models/user');
 
 const router =Router();
 const Purchase = require("../models/Purchase");
@@ -49,6 +49,41 @@ router.get('/user/orders/:id', async (req, res) => {
           success: false,
           message: 'Internal Server Error'
       });
+  }
+});
+
+router.post('/validate-otp', async (req, res) => {
+  console.log(req.body);
+  try {
+      const { otp, userId } = req.body;
+
+      
+
+      const user = await User.findOne({ otp: otp });
+
+
+      if (!user) {
+          return res.status(404).send({ message: 'User not found.' });
+      }
+
+      if (user.verified) {
+          return res.status(400).send({ message: 'User is already verified.' });
+      }
+
+      // Use the validateOTP method you added to your user schema
+      const isValid = user.validateOTP(otp);
+
+      if (isValid) {
+          user.verified = true;
+          await user.save();
+          return res.status(200).send({ message: 'OTP verified successfully.' });
+      } else {
+          return res.status(401).send({ message: 'Invalid OTP.' });
+      }
+
+  } catch (error) {
+      console.error('Error during OTP validation:', error);
+      return res.status(500).send({ message: 'Internal Server Error' });
   }
 });
 

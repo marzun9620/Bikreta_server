@@ -65,10 +65,9 @@ const user = async (req, res) => {
             try {
                 await newUser.save();
 
+
                 // Sending the OTP to the user's email
                 await sendEmail(newUser.email, "Verify Your Email", `Your verification code is: ${otp}. This code will expire in 10 minutes.`);
-
-                res.status(201).send({ message: "A verification code has been sent to your email. Please enter it on the platform to verify your account." });
 
             } catch (saveErr) {
                 console.error("Error while saving the user:", saveErr.message);

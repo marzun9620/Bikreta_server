@@ -61,6 +61,7 @@ const auth = async (req, res) => {
         await sendEmail(user.email, "Verify Your Email", `Your verification code is: ${otp}. This code will expire in 10 minutes.`);
         return res.status(204).send({ message: "A new verification code has been sent to your email. Please verify your account using the OTP." });
 
+
     } catch (err) {
         console.error("Error in user authentication:", err.message);
         res.status(400).send({ message: "Internal Server Error" });

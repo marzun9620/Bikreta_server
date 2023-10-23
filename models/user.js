@@ -34,11 +34,25 @@ userSchema.methods.generateAuthToken = function () {
 userSchema.methods.setOTP = function() {
     const otp = crypto.randomBytes(3).toString("hex"); // generates a 6-character hexadecimal string
     this.otp = otp;
-    const expiry = new Date();
-    expiry.setMinutes(expiry.getMinutes() + 10); // OTP expires after 10 minutes
-    this.otpExpires = expiry;
+
+    const currentDate = new Date();
+
+    // Get timezone offset in minutes
+    const timezoneOffsetMinutes = currentDate.getTimezoneOffset();
+
+    // Convert timezone offset to milliseconds
+    const timezoneOffsetMilliseconds = timezoneOffsetMinutes * 60 * 1000;
+
+    // Subtract the timezone offset from current date to get the local date and time
+    const localDate = new Date(currentDate.getTime() - timezoneOffsetMilliseconds);
+
+    // Set the OTP expiration time to 10 minutes from the current local time
+    localDate.setMinutes(localDate.getMinutes() + 10);
+    this.otpExpires = localDate;
+
     return otp;
 };
+
 
 // New method to validate OTP
 userSchema.methods.validateOTP = function(enteredOtp) {

@@ -3,6 +3,7 @@ const { User } = require("../models/user");
 const bcrypt = require('bcrypt');
 const sendEmail = require("../utils/sendEmail");
 const Joi = require("joi");
+const authenticate = require('../Middlewares/authMiddlewares');
 
 const auth = async (req, res) => {
     try {
@@ -15,6 +16,7 @@ const auth = async (req, res) => {
         // If the user is verified, generate a token and return it
         if (user.verified) {
             const token = user.generateAuthToken();
+            console.log(token);
             return res.status(200).send({
                 userName: user.fullName,
                 userId: user._id.toString(),
@@ -32,6 +34,8 @@ const auth = async (req, res) => {
                 const token = user.generateAuthToken();
                 return res.status(201).send({
                     message: "User verified and logged in successfully.",
+                    userName: user.fullName,
+                    userId: user._id.toString(),
                     token: token
                 });
             } else {

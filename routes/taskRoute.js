@@ -4,7 +4,7 @@ const {
   auth,
   userPic
 }= require("../controllers/userAuth");
-
+const authenticate = require('../Middlewares/authMiddlewares');
 
 const {
     getTask,
@@ -27,10 +27,13 @@ router.delete('/delete/:id',deleteTask);
 
 router.post('/auth',auth);
 router.post('/user', user);
-router.get('/user/orders/:id', async (req, res) => {
-  // Normally, you might get the user's ID from the authentication middleware
-  // For example:
-  // const userId = req.user.id;
+router.get('/user/orders/:id', authenticate,async (req, res) => {
+    const userIdFromToken = req.user._id;
+    const userIdFromParams = req.params.id;
+
+    if (userIdFromToken !== userIdFromParams) {
+        return res.status(403).send('Access denied. You can only access your own data.');
+    }
   const userId = req.params.id;
 
   try {
@@ -90,6 +93,6 @@ router.post('/validate-otp', async (req, res) => {
 
 router.get('/users/:id/verify/:token',emailVar)
 
-router.get('/user/photo/:userId',userPic );
+router.get('/user/photo/:userId',authenticate,userPic );
 
 module.exports=router;

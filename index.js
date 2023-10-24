@@ -10,7 +10,7 @@ const productRoutes = require('./routes/productRoutes');
 const path = require('path');
 const graph = require('./controllers/graph');
 const erp = require('./routes/erpRoutes');
-
+const admin = require('./routes/adminRoutes');
 
 const { graphqlHTTP } = require('express-graphql');
 const mongoose = require('mongoose');
@@ -26,7 +26,7 @@ app.use(express.static('uploads'));  // To serve images statically
 
 
 // Multer config
-
+app.use('/admin',admin);
 // Other routes
 app.use((err, req, res, next) => {
     console.error(err.stack);

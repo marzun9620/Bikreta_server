@@ -4,7 +4,7 @@ const {
   auth,
   userPic
 }= require("../controllers/userAuth");
-const authenticate = require('../Middlewares/authMiddlewares');
+const {authenticate} = require('../Middlewares/authMiddlewares');
 
 const {
     getTask,

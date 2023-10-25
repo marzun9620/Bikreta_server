@@ -1,13 +1,13 @@
 const Product = require('../models/Product');
-const Cart = require('../models/Cart'); // Import the Cart model if not already done
+const Cart = require('../models/Cart');
 
 const addToCart = async (req, res) => {
+   // console.log(req.body);
     try {
         const { userId, productId, quantity, price } = req.body;
 
         // Fetch the user's cart or create one if it doesn't exist
         let cart = await Cart.findOne({ user: userId });
-        
 
         if (!cart) {
             cart = new Cart({ user: userId, items: [] });
@@ -32,6 +32,9 @@ const addToCart = async (req, res) => {
         }
 
         await cart.save();
+
+        // Emit a socket event to notify the front-end of the cart update
+    // Use io from req object// 'cartUpdated' is the event name, and we're sending the user's ID as the payload
         
         res.status(200).send("Product added to cart");
 
@@ -40,5 +43,8 @@ const addToCart = async (req, res) => {
         res.status(500).send('Server Error');
     }
 };
+
+module.exports = addToCart;
+
 
 module.exports=addToCart;

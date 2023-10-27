@@ -16,7 +16,7 @@ const erp = require('./routes/erpRoutes');
 const Cart = require('./models/Cart');
 const Purchase = require('./models/Purchase');
 const graphqlSchema = require('./controllers/graphqlSchema');
-
+const admin = require('./routes/adminRoutes');
 const app = express();
 
 // Initialize server and socket.io
@@ -34,6 +34,7 @@ app.use(express.json());
 app.use(express.static('uploads'));  // Serve images statically
 
 // Routes
+app.use('/admin',admin);
 app.use("/api", taskRoute);
 app.use("/product/cart", addToCartRoute);
 app.use("/hob1/checkout", purchase);
@@ -67,7 +68,7 @@ app.post('/okk/:tran_id', async(req,res)=>{
 
 // Socket.io logic
 io.on("connection", socket => {
-  console.log("A client connected with socket ID:", socket.id);
+  //console.log("A client connected with socket ID:", socket.id);
   socket.on("cartUpdated1", updatedUserId => {
     console.log(updatedUserId);
     io.emit('cartUpdated',(updatedUserId));

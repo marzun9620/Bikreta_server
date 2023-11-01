@@ -11,10 +11,12 @@ const taskRoute = require('./routes/taskRoute');
 const addToCartRoute = require('./routes/addToCartRoute');
 const purchase = require('./routes/purchase');
 const productRoutes = require('./routes/productRoutes');
+const Offer=require('./routes/OfferRoute');
 const graph = require('./controllers/graph');
 const erp = require('./routes/erpRoutes');
 const Cart = require('./models/Cart');
 const Purchase = require('./models/Purchase');
+const show=require('./routes/FetchProductOffer')
 const graphqlSchema = require('./controllers/graphqlSchema');
 const admin = require('./routes/adminRoutes');
 const app = express();
@@ -36,12 +38,14 @@ app.use(express.static('uploads'));  // Serve images statically
 // Routes
 app.use('/admin',admin);
 app.use("/api", taskRoute);
+app.use("/product/api", show);
 app.use("/product/cart", addToCartRoute);
 app.use("/hob1/checkout", purchase);
 app.use("/bar", graph);
 app.use('/api/products', productRoutes);
 app.use("/marzun/cart/", addToCartRoute);
 app.use('/erp', erp);
+app.use('/erp/offers',Offer);
 app.use('/pdfs/', express.static(path.join(__dirname, 'public', 'pdfs')));
 
 // Route handlers

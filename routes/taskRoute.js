@@ -5,6 +5,8 @@ const {
   userPic
 }= require("../controllers/userAuth");
 const {authenticate} = require('../Middlewares/authMiddlewares');
+const Discount = require('../models/Discount'); // Import your Discount model
+const Offer = require('../models/Offer'); // Import your Offer model
 
 const {
     getTask,
@@ -89,7 +91,6 @@ router.post('/validate-otp', async (req, res) => {
       return res.status(500).send({ message: 'Internal Server Error' });
   }
 });
-
 
 router.get('/users/:id/verify/:token',emailVar)
 

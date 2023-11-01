@@ -40,8 +40,10 @@ router.get('/category/:category', async (req, res) => {
 });
 
 router.get('/status/:filter', async (req, res) => {
+  
   const { filter } = req.params;
   const { category, sortType } = req.query;
+  console.log(filter);
 
   let query = { orderStatus: filter };
 
@@ -61,7 +63,7 @@ router.get('/status/:filter', async (req, res) => {
       oneWeekFromNow.setDate(oneWeekFromNow.getDate() + 7);
       orders = orders.filter((order) => new Date(order.expectedDeliveryDate) <= oneWeekFromNow);
     }
-
+   // console.log(orders);
     res.json({ success: true, data: orders });
   } catch (error) {
     console.error('Error fetching orders:', error.message);

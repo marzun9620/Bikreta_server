@@ -92,6 +92,25 @@ router.post('/validate-otp', async (req, res) => {
   }
 });
 
+router.get("/api/user/:userId", async (req, res) => {
+    console.log(111111111111);
+    const userId = req.params.userId;
+  
+    try {
+      // Retrieve the user profile based on the userId
+      const user = await User.findById(userId).select("-password");
+  
+      if (!user) {
+        return res.status(404).send("User not found");
+      }
+  
+      res.send(user);
+    } catch (error) {
+      console.error(error);
+      res.status(500).send("Internal Server Error");
+    }
+  });
+
 router.get('/users/:id/verify/:token',emailVar)
 
 router.get('/user/photo/:userId',authenticate,userPic );

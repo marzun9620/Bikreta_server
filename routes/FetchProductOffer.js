@@ -34,12 +34,25 @@ router.get('/discount-and-offer/:productId', async (req, res) => {
 
     productDetails.discount = discount ? discount.discountPercentage : 0; // Return 0 if no discount found
     productDetails.offer = offer ? offer.offerDescription : 'No offer available'; // Return a default message if no offer found
-    console.log(productDetails);
+    //console.log(productDetails);
     res.json(productDetails);
   } catch (error) {
     console.error('Error fetching discount and offer:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
 });
+
+router.get('/products/all', async (req, res) => {
+  try {
+    // Fetch all products from the database
+    const products = await Product.find();
+
+    res.json(products);
+  } catch (error) {
+    console.error('Error fetching products:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
 
 module.exports = router;

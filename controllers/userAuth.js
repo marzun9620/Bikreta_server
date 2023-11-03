@@ -8,15 +8,15 @@ const authenticate = require('../Middlewares/authMiddlewares');
 const auth = async (req, res) => {
     try {
         const user = await User.findOne({ email: req.body.email });
-        if (!user) return res.status(400).send({ message: 'Invalid email or password.' });
+        if (!user) return res.status(206).send({ message: 'Invalid email or password.' });
 
         const validPassword = await bcrypt.compare(req.body.password, user.password);
-        if (!validPassword) return res.status(401).send({ message: 'Invalid email or password.' });
+        if (!validPassword) return res.status(205).send({ message: 'Invalid email or password.' });
 
         // If the user is verified, generate a token and return it
         if (user.verified) {
             const token = user.generateAuthToken();
-            console.log(token);
+           // console.log(token);
             return res.status(200).send({
                 userName: user.fullName,
                 userId: user._id.toString(),

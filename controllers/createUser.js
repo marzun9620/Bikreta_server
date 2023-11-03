@@ -21,9 +21,7 @@ const upload = multer({ storage: multer.memoryStorage() }).single('profilePhoto'
 const user = async (req, res) => {
     console.log(req.body);
     upload(req, res, async (err) => {
-        if (err) {
-            return res.status(500).send(err.message);
-        }
+      
 
         if (!req.file) {
             return res.status(400).send('No file uploaded.');
@@ -68,9 +66,10 @@ const user = async (req, res) => {
 
                 // Sending the OTP to the user's email
                 await sendEmail(newUser.email, "Verify Your Email", `Your verification code is: ${otp}. This code will expire in 10 minutes.`);
-
+                return res.status(201).send('Success');
             } catch (saveErr) {
                 console.error("Error while saving the user:", saveErr.message);
+                console.log(err);
                 res.status(500).send("Server error: Failed to save user to the database");
             }
         }).end(imageStream);

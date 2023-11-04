@@ -12,7 +12,7 @@ const store_id = process.env.STORE_ID
 const store_passwd = process.env.STORE_PASS
 const is_live = false //true for live, false for sandbox
 const io = require('socket.io')
-
+const BASE_URL="https://bikreta.onrender.com"
 const router =Router();
 const getCart = async (req, res) => {
     try {
@@ -100,7 +100,7 @@ expectedDelivery.setDate(currentDate.getDate() + 7);
         total_amount: (p.unitPrice * quantity),
         currency: 'BDT',
         tran_id:tran_id,  // use unique tran_id for each api call
-        success_url: `http://localhost:3000/hob1/checkout/okk/${tran_id}`,
+        success_url: `${BASE_URL}/hob1/checkout/okk/${tran_id}`,
         fail_url: 'http://localhost:3030/fail',
         cancel_url: 'http://localhost:3030/cancel',
         ipn_url: 'http://localhost:3030/ipn',

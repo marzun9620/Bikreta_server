@@ -25,7 +25,7 @@ const app = express();
 const server = require('http').createServer(app);
 const io = require("socket.io")(server, {
     cors: {
-        origin: "http://localhost:3006"
+        origin: process.env.BASE_URL
     }
 });
 
@@ -63,7 +63,7 @@ app.post('/okk/:tran_id', async(req,res)=>{
   console.log('jii');
   if(result.modifiedCount>=0){
     res.redirect(
-      `localhost:3006`
+      process.env.BASE_URL
     );
   };
 })

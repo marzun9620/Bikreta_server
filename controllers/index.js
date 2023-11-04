@@ -11,12 +11,10 @@ const SSLCommerzPayment = require('sslcommerz-lts')
 const store_id = process.env.STORE_ID
 const store_passwd = process.env.STORE_PASS
 const is_live = false //true for live, false for sandbox
-const io = require('socket.io')
 
 const router =Router();
 const getCart = async (req, res) => {
     try {
-        
         const userId = req.params.userId;
 
         // Fetch user's cart
@@ -141,19 +139,13 @@ expectedDelivery.setDate(currentDate.getDate() + 7);
 
     });
     await purchase.save();
-    
-        // Generate a PDF (this step will vary depending on what library or service you use)
-        const pdfLink = await generatePDF(purchase, userId, productId);
-
-        // Send transactionId and pdfLink as response
-       
     const sslcz = new SSLCommerzPayment(store_id, store_passwd, is_live)
     sslcz.init(data).then(apiResponse => {
         // Redirect the user to payment gateway
         let GatewayPageURL = apiResponse.GatewayPageURL
        // res.redirect(GatewayPageURL)
        console.log(GatewayPageURL);
-       res.json({ url:GatewayPageURL,transactionId: purchase.transactionId, pdfLink });
+       res.send({url:GatewayPageURL});
         console.log('Redirecting to: ', GatewayPageURL)
     });
 

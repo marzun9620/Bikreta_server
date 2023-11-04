@@ -1,5 +1,5 @@
 const {Router}=require('express');
-
+const BASE_URL="https://bikreta.onrender.com"
 const addToCart=require('../controllers/addToCart') ;
 const Purchase=require('../models/Purchase');
 const {
@@ -32,7 +32,7 @@ router.post('/okk/:tran_id', async (req, res) => {
        // res.send({ pdfLink });
   
         // After sending the PDF link, redirect the client to another URL
-        res.redirect(`http://localhost:3006/payment/done?pdfLink=${pdfLink}`);
+        res.redirect(`${BASE_URL}/payment/done?pdfLink=${pdfLink}`);
 
       } else {
         res.status(404).send('PDF link not available.');

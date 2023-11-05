@@ -20,7 +20,7 @@ const show=require('./routes/FetchProductOffer')
 const graphqlSchema = require('./controllers/graphqlSchema');
 const admin = require('./routes/adminRoutes');
 const app = express();
-
+const {authAdmin} = require('./Middlewares/authMiddlewares');
 // Initialize server and socket.io
 const server = require('http').createServer(app);
 const io = require("socket.io")(server, {
@@ -44,7 +44,7 @@ app.use("/hob1/checkout", purchase);
 app.use("/bar", graph);
 app.use('/api/products', productRoutes);
 app.use("/marzun/cart/", addToCartRoute);
-app.use('/erp', erp);
+app.use('/erp',authAdmin, erp);
 app.use('/erp/offers',Offer);
 app.use('/pdfs/', express.static(path.join(__dirname, 'public', 'pdfs')));
 

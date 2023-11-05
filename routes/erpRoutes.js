@@ -65,7 +65,7 @@ router.get('/total-cost', async (req, res) => {
 
 
 // Search products
-router.get('/products/search',authAdmin, async (req, res) => {
+router.get('/products/search', async (req, res) => {
     try {
         const query = req.query.q;
         if (!query) {
@@ -85,7 +85,7 @@ router.get('/products/search',authAdmin, async (req, res) => {
 // Assuming you've already required express, router, and the Category model
 
 // Search categories
-router.get('/categories/search',authAdmin, async (req, res) => {
+router.get('/categories/search', async (req, res) => {
   try {
       const query = req.query.q;
       if (!query) {

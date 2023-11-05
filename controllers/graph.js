@@ -1,8 +1,8 @@
 const express = require('express');
 const Purchase = require('../models/Purchase');
-
+const {authAdmin} =require('../Middlewares/authMiddlewares')
 const router = express.Router();
-router.get('/product-sales-by-district', async (req, res) => {
+router.get('/product-sales-by-district',authAdmin, async (req, res) => {
     try {
         const salesData = await Purchase.aggregate([
             {
@@ -35,7 +35,7 @@ const formatDate = (date) => {
     return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
 }
 
-router.get('/api/sales-by-district-weekly', async (req, res) => {
+router.get('/api/sales-by-district-weekly', authAdmin,async (req, res) => {
     try {
         const today = new Date();
         today.setHours(23, 59, 59, 999);  // End of the day

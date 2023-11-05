@@ -9,7 +9,7 @@ const {
     allCatagories,
     addProducts
 } =require('../controllers/erpController')
-
+const {authAdmin} = require('../Middlewares/authMiddlewares');
 
 router.post('/add/catagory',addCategory);
 router.get('/all/categories',allCatagories);
@@ -30,7 +30,7 @@ router.get('/total-cost', async (req, res) => {
   });
   
   // Total Making Cost Endpoint
-  router.get('/total-making-cost', async (req, res) => {
+  router.get('/total-making-cost', authAdmin,async (req, res) => {
     try {
       const totalMakingCost = await Purchase.aggregate([
         { $match: { orderStatus: "Placed" } },
@@ -44,7 +44,7 @@ router.get('/total-cost', async (req, res) => {
   });
   
   // Running Orders Count Endpoint
-  router.get('/running-orders-count', async (req, res) => {
+  router.get('/running-orders-count',authAdmin, async (req, res) => {
     try {
       const runningOrders = await Purchase.countDocuments({ orderStatus: "Placed" });
       res.json({ runningOrders });
@@ -54,7 +54,7 @@ router.get('/total-cost', async (req, res) => {
   });
   
   // Customers Added Count Endpoint
-  router.get('/customers-added-count', async (req, res) => {
+  router.get('/customers-added-count',authAdmin, async (req, res) => {
     try {
       const customersAdded = await User.countDocuments(); // Adjust based on your User model and criteria
       res.json({ customersAdded });
@@ -65,7 +65,7 @@ router.get('/total-cost', async (req, res) => {
 
 
 // Search products
-router.get('/products/search', async (req, res) => {
+router.get('/products/search',authAdmin, async (req, res) => {
     try {
         const query = req.query.q;
         if (!query) {
@@ -85,7 +85,7 @@ router.get('/products/search', async (req, res) => {
 // Assuming you've already required express, router, and the Category model
 
 // Search categories
-router.get('/categories/search', async (req, res) => {
+router.get('/categories/search',authAdmin, async (req, res) => {
   try {
       const query = req.query.q;
       if (!query) {

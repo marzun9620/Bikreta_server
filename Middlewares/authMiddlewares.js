@@ -22,8 +22,8 @@ function authenticate(req, res, next) {
 function authAdmin(req, res, next) {
     const token = req.header('x-auth-token');
     console.log(token);
-    if (!token || token == undefined) return res.status(401).send('Access denied. No token provided');
-
+    if (!token ) return res.status(401).send('Access denied. No token provided');
+  console.log('hello fuckers');
     try {
         const decoded = jwt.verify(token, process.env.KEY);
         req.admin = decoded;

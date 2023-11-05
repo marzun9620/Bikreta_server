@@ -44,7 +44,7 @@ app.use("/hob1/checkout", purchase);
 app.use("/bar", graph);
 app.use('/api/products', productRoutes);
 app.use("/marzun/cart/", addToCartRoute);
-app.use('/erp',authAdmin, erp);
+app.use('/erp',erp);
 app.use('/erp/offers',Offer);
 app.use('/pdfs/', express.static(path.join(__dirname, 'public', 'pdfs')));
 

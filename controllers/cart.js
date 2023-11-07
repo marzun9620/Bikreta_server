@@ -85,16 +85,18 @@ expectedDelivery.setDate(currentDate.getDate() + 7);
 
 
 const purchaseProduct = async (req, res) => {
-    const { userId, productId, quantity, itemId } = req.body;
+    const { userId, productId, quantity, itemId,permit } = req.body;
     const p = await Product.findOne({ _id: productId });
     const currentDate = new Date();
 const expectedDelivery = new Date();
 expectedDelivery.setDate(currentDate.getDate() + 7);
-
-     await Cart.updateOne(
+if(permit==2){
+    await Cart.updateOne(
         { "user": userId, "items._id": itemId },
         { "$set": { "items.$.isBought": true } }
     );
+}
+   
   const tran_id=generateTransactionId();
     const data = {
         total_amount: (p.unitPrice * quantity),

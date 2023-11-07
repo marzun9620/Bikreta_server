@@ -7,7 +7,7 @@ const {
 const {authenticate} = require('../Middlewares/authMiddlewares');
 const Discount = require('../models/Discount'); // Import your Discount model
 const Offer = require('../models/Offer'); // Import your Offer model
-
+const Token = require('../models/token'); // Import your Token model
 const {
     getTask,
     saveTask1,
@@ -110,6 +110,29 @@ router.get("/api/user/:userId", async (req, res) => {
       res.status(500).send("Internal Server Error");
     }
   });
+
+
+
+
+// Define the route for token removal
+router.post('/logout', async (req, res) => {
+  try {
+    const userId = req.body.userId; // Get the user's ID from the request
+    // Find and remove the user's token from the "token" collection
+    const result = await Token.findOneAndDelete({ userId });
+    if (result) {
+      res.status(200).json({ message: 'Token removed successfully' });
+    } else {
+      res.status(400).json({ message: 'Token not found or already removed' });
+    }
+  } catch (error) {
+    console.error('Error while removing token:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+});
+
+
+
 
 router.get('/users/:id/verify/:token',emailVar)
 

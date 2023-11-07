@@ -3,6 +3,7 @@ const { User } = require("../models/user");
 const bcrypt = require('bcrypt');
 const sendEmail = require("../utils/sendEmail");
 const Joi = require("joi");
+const Token = require('../models/token')
 const authenticate = require('../Middlewares/authMiddlewares');
 
 const auth = async (req, res) => {
@@ -17,6 +18,7 @@ const auth = async (req, res) => {
         if (user.verified) {
             const token = user.generateAuthToken();
            // console.log(token);
+           
             return res.status(200).send({
                 userName: user.fullName,
                 userId: user._id.toString(),

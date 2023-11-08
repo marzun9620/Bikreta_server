@@ -9,7 +9,55 @@ const Purchase = require('../models/Purchase');
 const Product = require('../models/Product');
 const {authAdmin} = require('../Middlewares/authMiddlewares');
 const jwt = require("jsonwebtoken");
+router.get("/api/monthly-best-products", async (req, res) => {
+  console.log('Annnaya');
+  try {
+    // Calculate the start and end dates for the current month
+    const currentDate = new Date();
+    const currentYear = currentDate.getFullYear();
+    const currentMonth = currentDate.getMonth();
 
+    const firstDayOfMonth = new Date(currentYear, currentMonth, 1);
+    const lastDayOfMonth = new Date(currentYear, currentMonth + 1, 0);
+
+    // Use an aggregation pipeline to group and count purchases by product
+    const bestProducts = await Purchase.aggregate([
+      {
+        $match: {
+          orderPlacedDate: {
+            $gte: firstDayOfMonth,
+            $lte: lastDayOfMonth,
+          },
+        },
+      },
+      {
+        $group: {
+          _id: "$productId",
+          totalSales: { $sum: "$quantity" },
+        },
+      },
+      {
+        $lookup: {
+          from: "products", // Replace "products" with the actual name of your products collection
+          localField: "_id",
+          foreignField: "_id",
+          as: "productDetails",
+        },
+      },
+      {
+        $sort: { totalSales: -1 },
+      },
+      {
+        $limit: 10, // Get the top 10 best-selling products
+      },
+    ]);
+//console.log(bestProducts)
+    res.json(bestProducts);
+  } catch (error) {
+    console.error("Error fetching monthly best products:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
 router.post('/signup', async (req, res) => {
    // console.log(req.body);
     let admin = await Admin.findOne({ email: req.body.email });
@@ -54,20 +102,22 @@ router.get('/track/products/:productId', async (req, res) => {
   try {
     const productId = req.params.productId;
 
-    // Find the product by ID in the database
-    const product = await Product.findById(productId);
+    // Find the latest purchase with the given productId
+    const latestPurchase = await Purchase.findOne({ productId }).sort({ orderPlacedDate: -1 });
 
-    if (!product) {
-      return res.status(404).json({ success: false, message: 'Product not found' });
+    if (!latestPurchase) {
+      return res.status(404).json({ success: false, message: 'No purchase found for the product' });
     }
 
-    // Send the product details as a JSON response
-    res.status(200).json({ success: true, product });
+    // Send the latest order status as a JSON response
+    res.status(200).json({ success: true, orderStatus: latestPurchase.orderStatus });
   } catch (error) {
-    console.error('Error fetching product details:', error);
+    console.error('Error fetching order status:', error);
     res.status(500).json({ success: false, message: 'Internal server error' });
   }
 });
+
+
 
 
 router.post('/login', async (req, res) => {

@@ -79,7 +79,8 @@ const addProducts = (req, res) => {
                 url: result.secure_url,
                 publicId: result.public_id,
                 version: result.version
-            }
+            },
+            totalProducts: req.body.cartonStock * req.body.cartonSize
         });
 
         try {

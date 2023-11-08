@@ -85,8 +85,28 @@ expectedDelivery.setDate(currentDate.getDate() + 7);
 
 
 const purchaseProduct = async (req, res) => {
-    const { userId, productId, quantity, itemId,permit } = req.body;
+    const { userId, productId, quantity, itemId, permit } = req.body;
+    
+    if (!productId) {
+        return res.status(400).json({ message: 'Invalid productId' });
+    }
+    console.log(1);
+
     const p = await Product.findOne({ _id: productId });
+    if (!p) {
+        return res.status(404).json({ message: 'Product not found' });
+    }
+    console.log(2);
+    if (p.totalProducts < quantity) {
+        return res.status(400).json({ message: 'Insufficient stock' });
+    }
+    console.log(3);
+      // Calculate the updated stock after purchase
+      const updatedCartonStock = p.totalProducts - quantity;
+      
+      await p.updateOne({ _id: productId }, { totalProducts: updatedCartonStock });
+      // Update the product stock in the database
+      console.log(4);
     const currentDate = new Date();
 const expectedDelivery = new Date();
 expectedDelivery.setDate(currentDate.getDate() + 7);

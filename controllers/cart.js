@@ -102,9 +102,7 @@ const purchaseProduct = async (req, res) => {
     }
     console.log(3);
       // Calculate the updated stock after purchase
-      const updatedCartonStock = p.totalProducts - quantity;
-      
-      await p.updateOne({ _id: productId }, { totalProducts: updatedCartonStock });
+     
       // Update the product stock in the database
       console.log(4);
     const currentDate = new Date();
@@ -162,7 +160,13 @@ if(permit==2){
         paymentStatus:"false"
 
     });
-    await purchase.save();
+    
+    const p1 = await Product.findOne({ _id: productId });
+     const updatedCartonStock = p1.totalProducts - quantity;
+     
+      p1.totalProducts = updatedCartonStock;
+  await p1.save();
+  await purchase.save();
     
         // Generate a PDF (this step will vary depending on what library or service you use)
         const pdfLink = await generatePDF(purchase, userId, productId);

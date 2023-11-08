@@ -70,6 +70,10 @@ const productSchema = new mongoose.Schema({
         url: String,         
         publicId: String,     
         version: String       
+    },
+    totalProducts:{
+        type: Number,
+        required: true
     }
 });
 

@@ -19,9 +19,9 @@ adminSchema.pre('save', async function(next) {
     next();
 });
 adminSchema.methods.generateAuthToken = function() {
-    const token = jwt.sign({ _id: this._id }, process.env.KEY, { expiresIn: '1h' });
+    const token = jwt.sign({ _id: this._id, isAdmin: true }, process.env.KEYADMIN, { expiresIn: '1h' });
     return token;
-}
-
+  }
+  
 
 module.exports = mongoose.model('Admin', adminSchema);

@@ -11,9 +11,9 @@ const {
 } =require('../controllers/erpController')
 const {authAdmin} = require('../Middlewares/authMiddlewares');
 
-router.post('/add/catagory',addCategory);
-router.get('/all/categories',allCatagories);
-router.post('/add1/products',addProducts);
+router.post('/add/catagory',authAdmin,addCategory);
+router.get('/all/categories',authAdmin,allCatagories);
+router.post('/add1/products',authAdmin,addProducts);
 
 // Total Cost Endpoint
 router.get('/total-cost', async (req, res) => {

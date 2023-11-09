@@ -1,5 +1,6 @@
 const express = require('express');
 const Purchase = require('../models/Purchase');
+const Product = require('../models/Product');
 const {authAdmin} =require('../Middlewares/authMiddlewares')
 const router = express.Router();
 router.get('/product-sales-by-district',authAdmin, async (req, res) => {
@@ -90,6 +91,46 @@ router.get('/api/sales-by-district-weekly', authAdmin,async (req, res) => {
     }
 });
 
-
+router.get('/erp/highest-growth-categories', async (req, res) => {
+    try {
+      // Fetch all purchases and populate the 'product' field
+      const populatedPurchases = await Purchase.find().populate('productId').exec();
+  
+      // Calculate category sales
+      const categorySales = {};
+  
+      for (const purchase of populatedPurchases) {
+        const product = purchase.productId;
+  
+        const category = product.category;
+  
+        if (!categorySales[category]) {
+          categorySales[category] = 0;
+        }
+  
+        // Calculate total sales value for the category
+        categorySales[category] += purchase.quantity;
+      }
+  
+      // Convert the categorySales object into an array of objects for sorting
+      const categorySalesArray = Object.keys(categorySales).map((category) => ({
+        category,
+        sales: categorySales[category],
+      }));
+  
+      // Sort the categories by sales in descending order
+      categorySalesArray.sort((a, b) => b.sales - a.sales);
+  
+      // Get the top 5 categories
+      const top5Categories = categorySalesArray.slice(0, 5);
+  
+      res.json(top5Categories);
+    } catch (error) {
+      console.error('Error fetching data:', error);
+      res.status(500).json({ error: 'Server error' });
+    }
+  });
+  
+  
 
 module.exports = router;

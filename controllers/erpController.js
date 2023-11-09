@@ -37,6 +37,8 @@ const addCategory = async (req, res) => {
 //see all categories
 
 const allCatagories = async (req, res) => {
+
+    console.log("marzun")
     try {
         const categories = await Category.find();
         res.json(categories);

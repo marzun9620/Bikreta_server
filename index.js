@@ -67,7 +67,23 @@ app.post('/okk/:tran_id', async(req,res)=>{
     );
   };
 })
+app.get('/4marzun4/api/sales-data', async (req, res) => {
+  try {
+    const { productId, from, to } = req.query;
 
+    // Use the parameters to query your database for sales data
+    const salesData = await Purchase.find({
+      productId,
+      orderPlacedDate: { $gte: new Date(from), $lte: new Date(to) },
+    });
+
+    // Send the sales data as a response
+    res.json(salesData);
+  } catch (error) {
+    console.error('Error fetching sales data:', error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+});
 
 
 // Socket.io logic

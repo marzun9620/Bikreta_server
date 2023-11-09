@@ -1,5 +1,5 @@
 const {Router}=require('express');
-
+const BASE_URL="https://bikreta.netlify.app"
 const addToCart=require('../controllers/addToCart') ;
 const Purchase=require('../models/Purchase');
 const {
@@ -15,6 +15,7 @@ router.post('/okk/:tran_id', async (req, res) => {
     console.log(req.body)
     try {
       const transactionId = req.params.tran_id;
+      
   
       // Find the purchase based on the transaction ID
       const purchase = await Purchase.findOne({ transactionId });
@@ -23,7 +24,8 @@ router.post('/okk/:tran_id', async (req, res) => {
         res.status(404).send('Purchase not found.');
         return;
       }
-  
+       const productId=purchase.productId;
+       const userId=purchase.userId;
       // Generate the PDF link using your generatePDF function
       const pdfLink = await generatePDF(purchase, purchase.userId, purchase.productId);
   
@@ -32,7 +34,7 @@ router.post('/okk/:tran_id', async (req, res) => {
        // res.send({ pdfLink });
   
         // After sending the PDF link, redirect the client to another URL
-        res.redirect(`http://localhost:3006/payment/done?pdfLink=${pdfLink}`);
+        res.redirect(`${BASE_URL}/payment/${productId}/${userId}/done?pdfLink=${pdfLink}`);
 
       } else {
         res.status(404).send('PDF link not available.');

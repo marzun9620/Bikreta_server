@@ -1,5 +1,5 @@
 const {Router}=require('express');
-const BASE_URL="https://bikreta.netlify.app"
+const BASE_URL="http://localhost:3006"
 const addToCart=require('../controllers/addToCart') ;
 const Purchase=require('../models/Purchase');
 const {

@@ -79,10 +79,16 @@ router.post('/validate-otp', async (req, res) => {
       const isValid = user.validateOTP(otp);
 
       if (isValid) {
-          user.verified = true;
-          await user.save();
-          return res.status(200).send({ message: 'OTP verified successfully.' });
-      } else {
+        const token = user.generateAuthToken();
+       // console.log(token);
+       
+        return res.status(200).send({
+            userName: user.fullName,
+            userId: user._id.toString(),
+            message: "Logged in successfully.",
+            token: token
+        });
+    } else {
           return res.status(401).send({ message: 'Invalid OTP.' });
       }
 

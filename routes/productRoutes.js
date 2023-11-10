@@ -84,7 +84,7 @@ router.post("/:productId/rate", async (req, res) => {
           user: userId,
           ratingValue: parseInt(ratingValue)
       };
-      
+      console.log("heloooooooooooo")
       product.ratings.push(newRating);
 
       // Update the star count for the given rating value

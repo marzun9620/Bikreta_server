@@ -4,12 +4,14 @@ const addToCart=require('../controllers/addToCart') ;
 const Purchase=require('../models/Purchase');
 const {
    
-    purchaseProduct
+    purchaseProduct,
+    purchaseOverAllProduct
   } = require('../controllers/cart');
   const { generatePDF } = require('../utils/pdfGenrator');
 const router =Router();
 
 router.post('/bank',purchaseProduct)
+router.post('/overall',purchaseOverAllProduct)
 
 router.post('/okk/:tran_id', async (req, res) => {
     console.log(req.body)

@@ -5,7 +5,7 @@ const Cart = require('../models/Cart'); // Import the Cart model if not already 
 const mongoose = require('mongoose');
 const Purchase =require('../models/Purchase');
 const { generateTransactionId } = require('../utils/utils');
-const { generatePDF } = require('../utils/pdfGenrator');
+const { generatePDF,generateOverallPDF } = require('../utils/pdfGenrator');
 
 const SSLCommerzPayment = require('sslcommerz-lts')
 const store_id = process.env.STORE_ID
@@ -185,6 +185,142 @@ if(permit==2){
 
  
 };
+const purchaseOverAllProduct = async (req, res) => {
+    try {
+        const { userId, cartItems } = req.body;
+
+        // Array to store the response for each item in the cart
+        const purchaseResponses = [];
+        const tran_id = generateTransactionId();
+        // Iterate through each item in the cart
+        for (const item of cartItems) {
+            const { product, quantity, price, isBought, _id } = item;
+
+            if (!product || !product._id) {
+                return res.status(400).json({ message: 'Invalid product' });
+            }
+
+            const productId = product._id;
+
+            const p = await Product.findOne({ _id: productId });
+            if (!p) {
+                return res.status(404).json({ message: 'Product not found' });
+            }
+
+            if (p.totalProducts < quantity) {
+                return res.status(400).json({ message: 'Insufficient stock' });
+            }
+
+            // Calculate the updated stock after purchase
+            const currentDate = new Date();
+            const expectedDelivery = new Date();
+            expectedDelivery.setDate(currentDate.getDate() + 7);
+
+            // Assuming you want to update the cart item to mark it as bought
+            await Cart.updateOne(
+                { "user": userId, "items._id": _id },
+                { "$set": { "items.$.isBought": true } }
+            );
+
+           
+            const data = {
+                total_amount: (p.unitPrice * quantity),
+                // other data...
+            };
+
+            const purchase = new Purchase({
+                userId,
+                productId,
+                transactionId: tran_id,
+                expectedDeliveryDate: expectedDelivery,
+                actualDeliveryDate: expectedDelivery,
+                orderPlacedDate: currentDate,
+                orderStatus: 'Placed',
+                quantity,
+                totalMakeCost: (p.unitMakeCost * quantity),
+                totalPaid: (p.unitPrice * quantity),
+                paymentStatus: "false"
+            });
+
+            const p1 = await Product.findOne({ _id: productId });
+            const updatedCartonStock = p1.totalProducts - quantity;
+            p1.totalProducts = updatedCartonStock;
+            await p1.save();
+            await purchase.save();
+
+            // Push the response for the current item to the array
+            purchaseResponses.push({
+                productId,
+                transactionId: tran_id,
+                // pdfLink is not generated here, it will be generated after the loop
+            });
+        }
+        const data = {
+            total_amount: (p.unitPrice * quantity),
+            currency: 'BDT',
+            tran_id:tran_id,  // use unique tran_id for each api call
+            success_url: `${BASE_URL}/hob1/checkout/okk/${tran_id}`,
+            fail_url: 'http://localhost:3030/fail',
+            cancel_url: 'http://localhost:3030/cancel',
+            ipn_url: 'http://localhost:3030/ipn',
+            shipping_method: 'Courier',
+            product_name: 'Computer.',
+            product_category: 'Electronic',
+            product_profile: 'general',
+            cus_name: 'Customer Name',
+            cus_email: 'customer@example.com',
+            cus_add1: 'Dhaka',
+            cus_add2: 'Dhaka',
+            cus_city: 'Dhaka',
+            cus_state: 'Dhaka',
+            cus_postcode: '1000',
+            cus_country: 'Bangladesh',
+            cus_phone: '01711111111',
+            cus_fax: '01711111111',
+            ship_name: 'Customer Name',
+            ship_add1: 'Dhaka',
+            ship_add2: 'Dhaka',
+            ship_city: 'Dhaka',
+            ship_state: 'Dhaka',
+            ship_postcode: 1000,
+            ship_country: 'Bangladesh',
+        };
+
+        // Generate a single PDF for all items in the cart
+        const pdfLink = await generateOverallPDF1(cartItems, userId);
+
+        // Update pdfLink in each response
+        purchaseResponses.forEach(response => {
+            response.pdfLink = pdfLink;
+        });
+
+        const sslcz = new SSLCommerzPayment(store_id, store_passwd, is_live)
+        sslcz.init(data).then(apiResponse => {
+            // Redirect the user to payment gateway
+            let GatewayPageURL = apiResponse.GatewayPageURL
+           // res.redirect(GatewayPageURL)
+           console.log(GatewayPageURL);
+           res.json({ url:GatewayPageURL,transactionId: purchase.transactionId, pdfLink });
+            console.log('Redirecting to: ', GatewayPageURL)
+        });
+
+        
+    } catch (error) {
+        console.error("Error during purchaseProduct:", error);
+        res.status(500).json({ error: "Internal Server Error" });
+    }
+};
+
+// Function to generate a single PDF for all items in the cart
+const generateOverallPDF1 = async (cartItems, userId) => {
+    // Implement your logic to generate a PDF for all items in the cart
+    // You can use cartItems and userId to fetch necessary information
+    // Return the link or path to the generated PDF
+    const pdfLink = await generateOverallPDF(cartItems, userId);
+    return pdfLink;
+};
+
+
 const getFullCart= async (req, res) => {
     //console.log(req.params.userId);
 
@@ -211,5 +347,6 @@ const getFullCart= async (req, res) => {
 module.exports = {
     getFullCart,
     getCart,
-    purchaseProduct
+    purchaseProduct,
+    purchaseOverAllProduct
   };

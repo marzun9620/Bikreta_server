@@ -12,9 +12,7 @@ const purchaseSchema = new mongoose.Schema({
         required: true
     },
     transactionId: {
-        type: String,
-       
-        unique: true
+        type: String
     },
    expectedDeliveryDate: {
         type: Date,

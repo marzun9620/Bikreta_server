@@ -7,14 +7,14 @@ const {
     purchaseProduct,
     purchaseOverAllProduct
   } = require('../controllers/cart');
-  const { generatePDF } = require('../utils/pdfGenrator');
+  const { generatePDF ,generateOverallPDF} = require('../utils/pdfGenrator');
 const router =Router();
 
 router.post('/bank',purchaseProduct)
 router.post('/overall',purchaseOverAllProduct)
 
 router.post('/okk/:tran_id', async (req, res) => {
-    console.log(req.body)
+    //console.log(req.body)
     try {
       const transactionId = req.params.tran_id;
       

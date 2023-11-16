@@ -103,6 +103,71 @@ router.get('/categories/search', async (req, res) => {
   }
 });
 
+
+// Modify the /api/placed route in your server-side code (e.g., Express.js)
+router.get('/api/placed', async (req, res) => {
+  try {
+    const categoryFilter = req.query.category;
+
+    if (categoryFilter && categoryFilter.toLowerCase() !== 'all') {
+      // Find products based on the selected category
+      const category = await Category.findOne({ name: categoryFilter });
+      if (category) {
+        const products = await Product.find({ category: category.name });
+
+        // Get the product IDs
+        const productIds = products.map((product) => product._id);
+
+        // Find purchases for the selected products with orderStatus 'Placed'
+        const purchases = await Purchase.find({
+          productId: { $in: productIds },
+          orderStatus: 'Placed',
+        });
+
+        return res.json(purchases);
+      }
+    } else {
+      // If category is 'All', select all products from purchases where orderStatus is 'Placed'
+      const allPurchases = await Purchase.find({ orderStatus: 'Placed' });
+      return res.json(allPurchases);
+    }
+
+    // If the category is not found or 'All' is not selected, return an empty array
+    res.json([]);
+  } catch (error) {
+    console.error('Error fetching placed purchases:', error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+});
+
+router.put('/api/update-status', async (req, res) => {
+  try {
+    const { category } = req.query;
+    let query = { orderStatus: 'Placed' };
+
+    if (category && category !== 'All') {
+      // If a specific category is selected
+      // Fetch product IDs based on the category
+      const productIds = await Product.find({ category }).distinct('_id');
+      query.productId = { $in: productIds };
+    }
+
+    // Update orderStatus for all placed orders that match the query to 'Running'
+    if (category !== 'All') {
+      // If a specific category is selected
+      await Purchase.updateMany(query, { $set: { orderStatus: 'Running' } });
+    } else {
+      // If 'All' is selected, update the orderStatus for all placed orders
+      await Purchase.updateMany({ orderStatus: 'Placed' }, { $set: { orderStatus: 'Running' } });
+    }
+
+    res.json({ message: 'Order status updated successfully.' });
+  } catch (error) {
+    console.error('Error updating order status:', error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+});
+
 // ... other routes
 
 module.exports=router;

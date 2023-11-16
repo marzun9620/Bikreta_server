@@ -178,7 +178,7 @@ if(permit==2){
         // Redirect the user to payment gateway
         let GatewayPageURL = apiResponse.GatewayPageURL
        // res.redirect(GatewayPageURL)
-       console.log(GatewayPageURL);
+      
        res.json({ url:GatewayPageURL,transactionId: purchase.transactionId, pdfLink });
         console.log('Redirecting to: ', GatewayPageURL)
     });
@@ -187,12 +187,10 @@ if(permit==2){
 };
 const purchaseOverAllProduct = async (req, res) => {
     try {
-        const { userId, cartItems } = req.body;
-
-        // Array to store the response for each item in the cart
+        const { userId, cartItems,sum} = req.body;
         const purchaseResponses = [];
         const tran_id = generateTransactionId();
-        // Iterate through each item in the cart
+       
         for (const item of cartItems) {
             const { product, quantity, price, isBought, _id } = item;
 
@@ -201,6 +199,17 @@ const purchaseOverAllProduct = async (req, res) => {
             }
 
             const productId = product._id;
+
+         // console.log(item);
+
+          
+                // If found, increase the quantity of the existing item
+                await Cart.updateOne(
+                    { "user": userId, "items._id": item._id },
+                    { "$set": { "items.$.isBought": true } }
+                );
+                //Push the response for the current item to the array
+             // console.log("Hello")
 
             const p = await Product.findOne({ _id: productId });
             if (!p) {
@@ -216,18 +225,6 @@ const purchaseOverAllProduct = async (req, res) => {
             const expectedDelivery = new Date();
             expectedDelivery.setDate(currentDate.getDate() + 7);
 
-            // Assuming you want to update the cart item to mark it as bought
-            await Cart.updateOne(
-                { "user": userId, "items._id": _id },
-                { "$set": { "items.$.isBought": true } }
-            );
-
-           
-            const data = {
-                total_amount: (p.unitPrice * quantity),
-                // other data...
-            };
-
             const purchase = new Purchase({
                 userId,
                 productId,
@@ -242,23 +239,28 @@ const purchaseOverAllProduct = async (req, res) => {
                 paymentStatus: "false"
             });
 
+           // console.log("Hello11")
+
             const p1 = await Product.findOne({ _id: productId });
             const updatedCartonStock = p1.totalProducts - quantity;
             p1.totalProducts = updatedCartonStock;
             await p1.save();
             await purchase.save();
 
-            // Push the response for the current item to the array
-            purchaseResponses.push({
-                productId,
-                transactionId: tran_id,
-                // pdfLink is not generated here, it will be generated after the loop
-            });
         }
+
+        // Generate a single PDF for all items in the cart
+        const pdfLink = await generateOverallPDF1(cartItems, userId);
+
+        // Update pdfLink in each response
+        purchaseResponses.forEach(response => {
+            response.pdfLink = pdfLink;
+        });
+
         const data = {
-            total_amount: (p.unitPrice * quantity),
+            total_amount: sum,
             currency: 'BDT',
-            tran_id:tran_id,  // use unique tran_id for each api call
+            tran_id: tran_id,  // use unique tran_id for each API call
             success_url: `${BASE_URL}/hob1/checkout/okk/${tran_id}`,
             fail_url: 'http://localhost:3030/fail',
             cancel_url: 'http://localhost:3030/cancel',
@@ -286,25 +288,17 @@ const purchaseOverAllProduct = async (req, res) => {
             ship_country: 'Bangladesh',
         };
 
-        // Generate a single PDF for all items in the cart
-        const pdfLink = await generateOverallPDF1(cartItems, userId);
-
-        // Update pdfLink in each response
-        purchaseResponses.forEach(response => {
-            response.pdfLink = pdfLink;
-        });
-
         const sslcz = new SSLCommerzPayment(store_id, store_passwd, is_live)
         sslcz.init(data).then(apiResponse => {
-            // Redirect the user to payment gateway
-            let GatewayPageURL = apiResponse.GatewayPageURL
-           // res.redirect(GatewayPageURL)
-           console.log(GatewayPageURL);
-           res.json({ url:GatewayPageURL,transactionId: purchase.transactionId, pdfLink });
-            console.log('Redirecting to: ', GatewayPageURL)
+            if (apiResponse.GatewayPageURL) {
+                // Continue with the rest of the code
+                console.log('Redirecting to: ', apiResponse.GatewayPageURL);
+                res.json({ url: apiResponse.GatewayPageURL, transactionId: tran_id, pdfLink });
+            } else {
+                console.error("Invalid response from SSLCommerz:", apiResponse);
+                res.status(500).json({ error: "Internal Server Error" });
+            }
         });
-
-        
     } catch (error) {
         console.error("Error during purchaseProduct:", error);
         res.status(500).json({ error: "Internal Server Error" });

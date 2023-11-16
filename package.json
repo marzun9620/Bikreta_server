@@ -16,6 +16,7 @@
   "dependencies": {
     "@sendgrid/mail": "^7.7.0",
     "bcrypt": "^5.1.1",
+    "bwip-js": "^4.1.2",
     "cloudinary": "^1.41.0",
     "cors": "^2.8.5",
     "dot": "^1.1.3",

@@ -5,7 +5,8 @@ const Cart = require('../models/Cart'); // Import the Cart model if not already 
 const mongoose = require('mongoose');
 const Purchase =require('../models/Purchase');
 const { generateTransactionId } = require('../utils/utils');
-const { generatePDF,generateOverallPDF } = require('../utils/pdfGenrator');
+const { generatePDF } = require('../utils/pdfGenrator');
+const {generateOverallPDF} =require ('../utils/OverallPdfgenerator');
 
 const SSLCommerzPayment = require('sslcommerz-lts')
 const store_id = process.env.STORE_ID
@@ -250,18 +251,16 @@ const purchaseOverAllProduct = async (req, res) => {
         }
 
         // Generate a single PDF for all items in the cart
-        const pdfLink = await generateOverallPDF1(cartItems, userId);
-
+        const pdfLink = await generateOverallPDF(cartItems, userId,tran_id);
+       console.log(pdfLink);
         // Update pdfLink in each response
-        purchaseResponses.forEach(response => {
-            response.pdfLink = pdfLink;
-        });
+     
 
         const data = {
             total_amount: sum,
             currency: 'BDT',
             tran_id: tran_id,  // use unique tran_id for each API call
-            success_url: `${BASE_URL}/hob1/checkout/okk/${tran_id}`,
+            success_url: `${BASE_URL}/hob1/checkout/overall/okk/${tran_id}?pdfLink=${pdfLink}`,
             fail_url: 'http://localhost:3030/fail',
             cancel_url: 'http://localhost:3030/cancel',
             ipn_url: 'http://localhost:3030/ipn',
@@ -292,7 +291,7 @@ const purchaseOverAllProduct = async (req, res) => {
         sslcz.init(data).then(apiResponse => {
             if (apiResponse.GatewayPageURL) {
                 // Continue with the rest of the code
-                console.log('Redirecting to: ', apiResponse.GatewayPageURL);
+              //  console.log('Redirecting to: ', apiResponse.GatewayPageURL);
                 res.json({ url: apiResponse.GatewayPageURL, transactionId: tran_id, pdfLink });
             } else {
                 console.error("Invalid response from SSLCommerz:", apiResponse);

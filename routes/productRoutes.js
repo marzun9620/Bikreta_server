@@ -40,12 +40,14 @@ router.get('/category/:category', async (req, res) => {
 });
 
 router.get('/status/:filter', async (req, res) => {
-  
   const { filter } = req.params;
   const { category, sortType } = req.query;
-  console.log(filter);
 
-  let query = { orderStatus: filter };
+  let query = {};
+
+  if (filter && filter !== "ALL") {
+    query.orderStatus = filter;
+  }
 
   if (category && category !== "All") {
     const matchingProducts = await Product.find({ category }).select('_id');
@@ -54,7 +56,14 @@ router.get('/status/:filter', async (req, res) => {
   }
 
   try {
-    let orders = await Purchase.find(query).populate('productId userId');
+    let orders;
+    
+    if (filter === "ALL") {
+      // If filter is "ALL," fetch all products in the Purchase schema
+      orders = await Purchase.find({}).populate('productId userId');
+    } else {
+      orders = await Purchase.find(query).populate('productId userId');
+    }
 
     if (sortType === "date") {
       orders.sort((a, b) => new Date(b.orderPlacedDate) - new Date(a.orderPlacedDate));
@@ -63,7 +72,7 @@ router.get('/status/:filter', async (req, res) => {
       oneWeekFromNow.setDate(oneWeekFromNow.getDate() + 7);
       orders = orders.filter((order) => new Date(order.expectedDeliveryDate) <= oneWeekFromNow);
     }
-   // console.log(orders);
+
     res.json({ success: true, data: orders });
   } catch (error) {
     console.error('Error fetching orders:', error.message);
@@ -84,7 +93,7 @@ router.post("/:productId/rate", async (req, res) => {
           user: userId,
           ratingValue: parseInt(ratingValue)
       };
-      
+      console.log("heloooooooooooo")
       product.ratings.push(newRating);
 
       // Update the star count for the given rating value

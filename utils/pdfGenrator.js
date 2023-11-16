@@ -117,6 +117,8 @@ const generatePDF = async (purchase, userId, productId) => {
 };
 
 
+
 module.exports = {
-    generatePDF
+   generatePDF
+ 
 };

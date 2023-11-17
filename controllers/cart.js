@@ -14,6 +14,8 @@ const store_passwd = process.env.STORE_PASS
 const is_live = false //true for live, false for sandbox
 const io = require('socket.io')
 const BASE_URL="https://bikreta.onrender.com"
+//const BASE_URL="http://localhost:3000"
+
 const router =Router();
 const getCart = async (req, res) => {
     try {

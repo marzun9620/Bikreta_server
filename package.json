@@ -36,6 +36,7 @@
     "nodemailer": "^6.9.5",
     "nodemon": "^2.0.15",
     "pdfkit": "^0.13.0",
+    "plotly": "^1.0.6",
     "puppeteer": "^21.3.6",
     "socket.io": "^4.7.2",
     "sslcommerz-lts": "^1.1.0"

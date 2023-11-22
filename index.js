@@ -27,7 +27,7 @@ const offerCollection = require('./models/Offer');
 const app = express();
 const server = http.createServer(app);
 const io = socketIO(server, { cors: { origin: "http://localhost:3006", methods: ["GET", "POST"] } });
-
+//const io = socketIO(server, { cors: { origin: "https://bikreta.netlify.app", methods: ["GET", "POST"] } });
 
 // Middlewares
 app.use(cors());

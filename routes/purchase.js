@@ -74,7 +74,7 @@ router.post('/okk/:tran_id', async (req, res) => {
             console.log(`PDF Link received: ${pdfLink}`);
 
             // Redirect the client to another URL along with the PDF link
-            res.redirect(`${BASE_URL}/payment/${productId}/${userId}/done?pdfLink=${pdfLink}`);
+            res.redirect(`${BASE_URL}/payment/${transactionId}/${userId}/done?pdfLink=${pdfLink}`);
         } else {
             res.status(404).send('PDF link not available.');
         }

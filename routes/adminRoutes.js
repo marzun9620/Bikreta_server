@@ -121,7 +121,7 @@ router.get('/track/products/:productId', async (req, res) => {
 
 
 router.post('/login', async (req, res) => {
-   // console.log(11);
+   //console.log(req.body);
     let admin = await Admin.findOne({ email: req.body.email });
    // console.log(admin.password);
     if (!admin) return res.status(401).send('Invalid email or password.');
@@ -143,7 +143,7 @@ if (!isPasswordValid) return res.status(400).send('Invalid email or password.');
     
 });
 router.get('4marzun4/api/sales-data', async (req, res) => {
-  console.log("nabiha")
+  //console.log("nabiha")
   try {
     const { productId, from, to } = req.query;
 

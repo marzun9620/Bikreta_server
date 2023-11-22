@@ -82,40 +82,50 @@ router.get('/status/:filter', async (req, res) => {
 
 
 
-router.post("/:productId/rate", async (req, res) => {
+router.post("/:transactionId/rate", async (req, res) => {
   try {
-      const { userId, ratingValue } = req.body;
-      const product = await Product.findById(req.params.productId);
-      
-      if (!product) return res.status(404).send("Product not found");
-      
+    const { userId, ratingValue } = req.body;
+    const purchases = await Purchase.find({ transactionId: req.params.transactionId });
+
+    if (!purchases || purchases.length === 0) {
+      return res.status(404).send("No purchases found for the given transactionId");
+    }
+
+    // Iterate through each purchase and update the ratings for the associated product
+    for (const purchase of purchases) {
+      const product = await Product.findById(purchase.productId);
+
+      if (!product) {
+        console.log(`Product not found for purchaseId: ${purchase._id}`);
+        continue; // Skip to the next iteration if the product is not found
+      }
+
       const newRating = {
-          user: userId,
-          ratingValue: parseInt(ratingValue)
+        user: userId,
+        ratingValue: parseInt(ratingValue)
       };
-      console.log("heloooooooooooo")
+
       product.ratings.push(newRating);
 
-      // Update the star count for the given rating value
-      if(product.starCounts && product.starCounts[ratingValue]) {
-          product.starCounts[ratingValue] += 1;
+      if (product.starCounts && product.starCounts[ratingValue]) {
+        product.starCounts[ratingValue] += 1;
       } else {
-          // In case starCounts isn't defined or the specific rating value doesn't exist (this shouldn't happen, but just to be safe)
-          product.starCounts = { ...product.starCounts, [ratingValue]: 1 }
+        product.starCounts = { ...product.starCounts, [ratingValue]: 1 };
       }
 
       const totalRatings = product.ratings.length;
       const totalRatingValue = product.ratings.reduce((acc, curr) => acc + curr.ratingValue, 0);
-      
+
       product.averageRating = totalRatingValue / totalRatings;
       product.numberOfRatings = totalRatings;
 
       await product.save();
-      
-      res.send({ message: "Rating added successfully!" });
+    }
+
+    res.send({ message: "Ratings added successfully!" });
   } catch (error) {
-      console.error(error);
-      res.status(500).send("Server error");
+    console.error(error);
+    res.status(500).send("Server error");
   }
 });
 

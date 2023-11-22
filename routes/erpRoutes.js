@@ -2,6 +2,7 @@ const {Router}=require('express');
 const Purchase = require('../models/Purchase');  // Assuming Mongoose Model name is Purchase
 const {User} = require('../models/user');
 const Product = require('../models/Product');
+const Bill = require('../models/Bill')
 const Category=require('../models/Catagory')  // Assuming the path to the product model
 const router =Router();
 const {
@@ -63,7 +64,37 @@ router.get('/total-cost', async (req, res) => {
     }
   });
 
+  router.get('/erp/api/product/:productId', async (req, res) => {
+    try {
 
+      const productId = req.params.productId;
+     // console.log(productId);
+      // Find the product by productId in the MongoDB collection
+      const product = await Product.findOne({ productId });
+  
+      if (!product) {
+        return res.status(404).json({ message: 'Product not found' });
+      }
+  
+      // If product is found, send the details in the response
+      res.status(200).json(product);
+    } catch (error) {
+      console.error('Error fetching product details:', error);
+      res.status(500).json({ message: 'Internal Server Error' });
+    }
+  });
+
+  router.get("/erp/api/running", async (req, res) => {
+    try {
+      // Assuming "Running" is the status you are checking for
+      const runningOrders = await Purchase.find({ orderStatus: "Running" });
+     
+      res.json(runningOrders);
+    } catch (error) {
+      console.error("Error fetching running orders:", error);
+      res.status(500).json({ error: "Internal Server Error" });
+    }
+  });
 // Search products
 router.get('/products/search', async (req, res) => {
     try {
@@ -136,6 +167,87 @@ router.get('/api/placed', async (req, res) => {
     res.json([]);
   } catch (error) {
     console.error('Error fetching placed purchases:', error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+});
+
+router.get('/api1/placed', async (req, res) => {
+  try {
+    const categoryFilter = req.query.category;
+    const orderStatusFilter = req.query.orderStatus;
+
+    let query = { orderStatus: 'Placed' }; // Default filter for 'Placed' orders
+
+    if (categoryFilter && categoryFilter.toLowerCase() !== 'all') {
+      // Find products based on the selected category
+      const category = await Category.findOne({ name: categoryFilter });
+      if (category) {
+        const products = await Product.find({ category: category.name });
+
+        // Get the product IDs
+        const productIds = products.map((product) => product._id);
+
+        // Add product filter to the query
+        query.productId = { $in: productIds };
+      }
+    }
+
+    if (orderStatusFilter && orderStatusFilter.toLowerCase() === 'running') {
+      // If orderStatus is 'Running', update the query
+      query.orderStatus = 'Running';
+    }
+
+    // Find purchases based on the constructed query
+    const purchases = await Purchase.find(query);
+
+    return res.json(purchases);
+  } catch (error) {
+    console.error('Error fetching purchases:', error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+});
+
+
+router.post('/erp/api/bills/generate', async (req, res) => {
+  try {
+    const { products, totalRevenue } = req.body;
+
+    // Aggregate quantities and total making costs for each unique product ID
+    const aggregatedProducts = products.reduce((result, product) => {
+      const existingProduct = result.find(p => p.productId.toString() === product.productId.toString());
+
+      if (existingProduct) {
+        // If product ID already exists, update quantity and totalMakeCost
+        existingProduct.quantity += product.quantity;
+        existingProduct.totalMakeCost += product.totalMakeCost;
+      } else {
+        // If product ID is new, add it to the result array
+        result.push({
+          productId: product.productId,
+          quantity: product.quantity,
+          totalMakeCost: product.totalMakeCost
+        });
+      }
+
+      return result;
+    }, []);
+
+    // Assuming that the products array follows the structure in the Bill schema
+    const billData = {
+      products: aggregatedProducts,
+      totalRevenue,
+    };
+
+    const newBill = new Bill(billData);
+    await newBill.save();
+
+    // Update orderStatus to 'Mes' for products in the aggregatedProducts array
+    const productIdsToUpdate = aggregatedProducts.map(product => product.productId);
+    await Purchase.updateMany({ productId: { $in: productIdsToUpdate } }, { orderStatus: 'Mes' });
+
+    res.status(201).json({ message: 'Bill generated successfully' });
+  } catch (error) {
+    console.error('Error generating bill:', error);
     res.status(500).json({ error: 'Internal Server Error' });
   }
 });

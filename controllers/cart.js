@@ -4,6 +4,7 @@ const Product = require('../models/Product');
 const Cart = require('../models/Cart'); // Import the Cart model if not already done
 const mongoose = require('mongoose');
 const Purchase =require('../models/Purchase');
+const OutofStock1 =require('../models/outOfStockOrder');
 const { generateTransactionId } = require('../utils/utils');
 const { generatePDF } = require('../utils/pdfGenrator');
 const {generateOverallPDF} =require ('../utils/OverallPdfgenerator');
@@ -188,6 +189,96 @@ if(permit==2){
 
  
 };
+/*----------------------------------Out of stock order-----------------------------*/
+const outOfSTock1 = async (req, res) => {
+    const { userId, productId, quantity, itemId, permit } = req.body;
+    
+    if (!productId) {
+        return res.status(400).json({ message: 'Invalid productId' });
+    }
+    console.log(1);
+
+    const p = await Product.findOne({ _id: productId });
+    if (!p) {
+        return res.status(404).json({ message: 'Product not found' });
+    }
+   
+    console.log(3);
+      // Calculate the updated stock after purchase
+     
+      // Update the product stock in the database
+      console.log(4);
+    const currentDate = new Date();
+const expectedDelivery = new Date();
+expectedDelivery.setDate(currentDate.getDate() + 7);
+
+   
+  const tran_id=generateTransactionId();
+    const data = {
+        total_amount: (p.unitPrice * quantity),
+        currency: 'BDT',
+        tran_id:tran_id,  // use unique tran_id for each api call
+        success_url: `${BASE_URL}/hob1/checkout/okk/${tran_id}`,
+        fail_url: 'http://localhost:3030/fail',
+        cancel_url: 'http://localhost:3030/cancel',
+        ipn_url: 'http://localhost:3030/ipn',
+        shipping_method: 'Courier',
+        product_name: 'Computer.',
+        product_category: 'Electronic',
+        product_profile: 'general',
+        cus_name: 'Customer Name',
+        cus_email: 'customer@example.com',
+        cus_add1: 'Dhaka',
+        cus_add2: 'Dhaka',
+        cus_city: 'Dhaka',
+        cus_state: 'Dhaka',
+        cus_postcode: '1000',
+        cus_country: 'Bangladesh',
+        cus_phone: '01711111111',
+        cus_fax: '01711111111',
+        ship_name: 'Customer Name',
+        ship_add1: 'Dhaka',
+        ship_add2: 'Dhaka',
+        ship_city: 'Dhaka',
+        ship_state: 'Dhaka',
+        ship_postcode: 1000,
+        ship_country: 'Bangladesh',
+    };
+    const OutOfSTock = new OutofStock1({
+        userId,
+        productId,
+        transactionId: tran_id,
+        expectedDeliveryDate: expectedDelivery,
+        actualDeliveryDate: expectedDelivery,
+        orderPlacedDate: currentDate,
+        orderStatus:'Mes',
+        quantity,
+        totalMakeCost:(p.unitMakeCost * quantity),
+        totalPaid:(p.unitPrice * quantity),
+        paymentStatus:"false"
+
+    });
+
+  await OutOfSTock.save();
+    
+        // Generate a PDF (this step will vary depending on what library or service you use)
+        const pdfLink = await generatePDF(OutOfSTock, userId, productId);
+
+        // Send transactionId and pdfLink as response
+       
+    const sslcz = new SSLCommerzPayment(store_id, store_passwd, is_live)
+    sslcz.init(data).then(apiResponse => {
+        // Redirect the user to payment gateway
+        let GatewayPageURL = apiResponse.GatewayPageURL
+       // res.redirect(GatewayPageURL)
+      
+       res.json({ url:GatewayPageURL,transactionId: OutOfSTock.transactionId, pdfLink });
+        console.log('Redirecting to: ', GatewayPageURL)
+    });
+
+ 
+};
+/*--------------------------*/
 const purchaseOverAllProduct = async (req, res) => {
     try {
         const { userId, cartItems,sum} = req.body;
@@ -343,5 +434,6 @@ module.exports = {
     getFullCart,
     getCart,
     purchaseProduct,
-    purchaseOverAllProduct
+    purchaseOverAllProduct,
+    outOfSTock1 
   };

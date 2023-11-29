@@ -7,13 +7,16 @@ const Purchase=require('../models/Purchase');
 const {
    
     purchaseProduct,
-    purchaseOverAllProduct
+    purchaseOverAllProduct,
+    outOfSTock1
+
   } = require('../controllers/cart');
   const { generatePDF } = require('../utils/pdfGenrator');
   const {generateOverallPDF}=require('../utils/OverallPdfgenerator');
 const router =Router();
 
 router.post('/bank',purchaseProduct)
+router.post('/bank/outOfStock',outOfSTock1)
 router.post('/overall',purchaseOverAllProduct)
 
 router.post('/okk/:tran_id', async (req, res) => {

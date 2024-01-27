@@ -9,6 +9,7 @@ const mongoose = require("mongoose");
 const http = require("http");
 const socketIO = require("socket.io");
 const connection = require("./connection");
+const axios = require('axios');
 const adminRoutes = require("./routes/adminRoutes");
 const taskRoutes = require("./routes/taskRoute");
 const addToCartRoutes = require("./routes/addToCartRoute");
@@ -23,7 +24,7 @@ const Purchase = require('./models/Purchase');
 const productCollection = require('./models/Product');
 const discountCollection = require('./models/Discount');
 const offerCollection = require('./models/Offer');
-
+const ExcelJS = require('exceljs');
 const app = express();
 const server = http.createServer(app);
 const io = socketIO(server, { cors: { origin: "http://localhost:3006", methods: ["GET", "POST"] } });
@@ -48,6 +49,35 @@ app.use("/erp/offers", offerRoutes);
 app.use("/pdfs/", express.static(path.join(__dirname, "public", "pdfs")));
 
 // Route handlers
+// Assuming you have a mongoose model FormSubmission defined as described in the previous response
+
+const FormSubmission = require('./models/FormSubmission');
+
+app.post('/submit-form', async (req, res) => {
+  try {
+    const formData = req.body;
+    console.log('Form data received:', formData);
+
+    // Save the form data to MongoDB
+    const formSubmission = new FormSubmission(formData);
+    await formSubmission.save();
+
+    res.status(200).send('Form submitted successfully!');
+  } catch (error) {
+    console.error('Error submitting form:', error);
+    res.status(500).send('Internal Server Error');
+  }
+});
+app.get('/get-form-submissions', async (req, res) => {
+  try {
+    // Fetch form submissions from the database
+    const formSubmissions = await FormSubmission.find();
+    res.status(200).json(formSubmissions);
+  } catch (error) {
+    console.error('Error fetching form submissions:', error);
+    res.status(500).send('Internal Server Error');
+  }
+});
 
 // Secure endpoint with authAdmin middleware
 app.post("/okk/:tran_id", authAdmin, async (req, res, next) => {
